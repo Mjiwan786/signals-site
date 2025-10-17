@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(test:*)",
+      "Bash(npm i:*)",
+      "Bash(npm run dev)",
+      "Bash(taskkill:*)",
+      "Bash(npm run build)",
+      "Bash(Remove-Item -Path 'C:\\Users\\Maith\\OneDrive\\Desktop\\signals-site\\web\\.next' -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd.exe /c \"taskkill /F /PID 20932\")",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(git --version:*)",
+      "Bash(node --version:*)",
+      "Bash(npm:*)",
+      "Bash(powershell:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

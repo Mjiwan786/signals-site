@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark theme color palette */
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --elev: #1a1a24;
+  --border: #2a2a38;
+
+  /* Text colors */
+  --text: #f5f5f7;
+  --text-2: #c9c9d0;
+  --dim: #8b8b96;
+  --muted: #6b6b78;
+
+  /* Brand accent colors */
+  --accent-a: #6366f1;
+  --accent-b: #8b5cf6;
+  --accent: #6366f1;
+
+  /* Semantic colors */
+  --success: #10b981;
+  --danger: #ef4444;
+  --pos: #10b981;
+  --neg: #ef4444;
+}
+
+@layer base {
+  html {
+    background-color: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  a {
+    color: var(--accent);
+    transition-property: color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  a:hover {
+    color: var(--accent-b);
+  }
+
+  /* Focus visible styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Button and interactive element focus */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Skip to main content link for keyboard navigation */
+@layer components {
+  .skip-to-main {
+    position: absolute;
+    left: -9999px;
+    z-index: 999;
+    padding: 1rem 1.5rem;
+    background-color: var(--accent);
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+  }
+
+  .skip-to-main:focus {
+    left: 1rem;
+    top: 1rem;
+  }
+}
+
+/* Respect user's reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable framer-motion animations */
+  [data-framer-motion] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  /* Shadow glow effect for buttons and cards */
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-brand {
+    background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+  }
+
+  /* Smooth transitions */
+  .transition-base {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

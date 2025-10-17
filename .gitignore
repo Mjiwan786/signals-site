@@ -1,0 +1,69 @@
+# Environment variables - NEVER commit these
+.env
+.env.*
+!.env.example
+*.local
+
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# Vercel
+.vercel/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+.cache/
+
+# Stripe CLI
+stripe-cli
+stripe-cli.zip
+
+# Python (for API)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+api/.env
+api/.env.*
+
+# Redis dump
+dump.rdb
+
+# Secrets and credentials
+*.pem
+*.key
+*.cert
+credentials.json
