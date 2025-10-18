@@ -64,7 +64,7 @@ The frontend expects these endpoints from signals-api:
 
 API backend connects to Redis Cloud:
 ```bash
-redis-cli -u redis://default:inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818 --tls --cacert <path_to_ca_certfile>
+redis-cli -u redis://default:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT --tls --cacert <path_to_ca_certfile>
 ```
 
 ## Troubleshooting

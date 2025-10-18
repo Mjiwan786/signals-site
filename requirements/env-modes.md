@@ -132,13 +132,13 @@ The system determines which Redis stream to publish signals to based on the `ENV
 ## Redis Cloud Connection
 
 ### Connection Details
-- **URL**: `rediss://default:inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818/0`
+- **URL**: `rediss://default:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT/0`
 - **TLS**: Enabled (`REDIS_SSL=true`)
 - **Certificate**: `/app/certs/redis-ca.crt`
 
 ### CLI Connection Command
 ```bash
-redis-cli -u redis://default:inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818 --tls --cacert <path_to_ca_certfile>
+redis-cli -u redis://default:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT --tls --cacert <path_to_ca_certfile>
 ```
 
 ## Configuration File Hierarchy

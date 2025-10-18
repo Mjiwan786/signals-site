@@ -202,7 +202,7 @@ BTC/USD,sell,0.0055268541719740594,107013.17970000001,1.5377602205710024,trend_f
 
 ### Connection String
 ```bash
-redis-cli -u redis://default:inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818 --tls --cacert <path_to_ca_certfile>
+redis-cli -u redis://default:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT --tls --cacert <path_to_ca_certfile>
 ```
 
 ### Key Patterns

@@ -23,7 +23,15 @@
       "Bash(powershell:*)",
       "Bash(git config:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git commit --amend -m \"$(cat <<''EOF''\nInitial commit: Signals-Site SaaS platform\n\nUpdated scripts to use environment variables instead of hardcoded credentials\nEOF\n)\")",
+      "Bash(git log --all -S \"inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8\" --oneline)",
+      "Bash(git reflog expire --expire=now --all)",
+      "Bash(git gc --prune=now --aggressive)",
+      "Bash(git stash pop)",
+      "Bash(git stash drop)",
+      "Bash(find . -type f ( -name \"*.md\" -o -name \"*.py\" ) -exec sed -i 's/redis:\\/\\/default:inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8@redis-19818\\.c9\\.us-east-1-4\\.ec2\\.redns\\.redis-cloud\\.com:19818/redis:\\/\\/default:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT/g' {} +)",
+      "Bash(git commit -m \"docs: Remove hardcoded Redis credentials from documentation files\")"
     ],
     "deny": [],
     "ask": []

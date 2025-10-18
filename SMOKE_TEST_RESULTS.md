@@ -18,7 +18,7 @@
 
 ## Redis Connection Test
 - **Status:** ✅ **SUCCESSFUL**
-- **URL:** `redis://default:inwjuBWkh4rAtGnbQkLBuPkHXSmfokn8@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818`
+- **URL:** `redis://default:YOUR_PASSWORD@YOUR_HOST:YOUR_PORT`
 - **TLS:** ✅ Enabled with certifi certificates
 - **Stream Operations:** ✅ Working (6 signals in stream)
 - **Test Message:** ✅ Successfully added and retrieved
