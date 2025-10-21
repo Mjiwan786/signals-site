@@ -3,28 +3,49 @@
 @tailwind utilities;
 
 :root {
-  /* Dark theme color palette */
-  --bg: #0a0a0f;
-  --surface: #13131a;
+  /* Dark theme color palette - PRD specified */
+  --bg: #0A0B0F;
+  --surface: #0f1116;
   --elev: #1a1a24;
   --border: #2a2a38;
 
-  /* Text colors */
-  --text: #f5f5f7;
+  /* Text colors - PRD specified */
+  --text: #E6E8EC;
   --text-2: #c9c9d0;
-  --dim: #8b8b96;
+  --dim: #9AA0AA;
   --muted: #6b6b78;
 
-  /* Brand accent colors */
-  --accent-a: #6366f1;
-  --accent-b: #8b5cf6;
-  --accent: #6366f1;
+  /* Brand accent colors - PRD specified */
+  --accent-a: #6EE7FF;
+  --accent-b: #A78BFA;
+  --accent: #6EE7FF;
+  --highlight: #FF7336;
 
   /* Semantic colors */
   --success: #10b981;
   --danger: #ef4444;
   --pos: #10b981;
   --neg: #ef4444;
+
+  /* Enhanced gradient presets - Design System */
+  --gradient-neural: linear-gradient(135deg, #6EE7FF 0%, #A78BFA 50%, #FF7336 100%);
+  --gradient-mesh: radial-gradient(circle at 20% 50%, rgba(110, 231, 255, 0.15), transparent 50%),
+                   radial-gradient(circle at 80% 50%, rgba(167, 139, 250, 0.15), transparent 50%);
+  --gradient-glow: radial-gradient(circle at center, rgba(110, 231, 255, 0.2), transparent 70%);
+  --gradient-radial-accent: radial-gradient(circle at center, rgba(110, 231, 255, 0.15) 0%, transparent 70%);
+  --gradient-radial-violet: radial-gradient(circle at center, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
+
+  /* Glass morphism variants - ChainGPT inspired */
+  --glass-primary: rgba(15, 17, 22, 0.6);
+  --glass-secondary: rgba(26, 26, 36, 0.4);
+  --glass-border: rgba(110, 231, 255, 0.15);
+  --glass-border-hover: rgba(110, 231, 255, 0.35);
+
+  /* Semantic glow colors */
+  --success-glow: rgba(16, 185, 129, 0.2);
+  --danger-glow: rgba(239, 68, 68, 0.2);
+  --warning-glow: rgba(255, 115, 54, 0.2);
+  --info-glow: rgba(110, 231, 255, 0.2);
 }
 
 @layer base {
@@ -38,6 +59,21 @@
   body {
     background-color: var(--bg);
     color: var(--text);
+    position: relative;
+  }
+
+  /* Grain texture overlay for premium feel */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
   a {
@@ -105,9 +141,17 @@
 
 /* Custom utility classes */
 @layer utilities {
-  /* Shadow glow effect for buttons and cards */
+  /* Shadow glow effect for buttons and cards - PRD specified */
   .shadow-glow {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 40px rgba(110, 231, 255, 0.3);
+  }
+
+  .shadow-glow-violet {
+    box-shadow: 0 0 40px rgba(167, 139, 250, 0.3);
+  }
+
+  .shadow-glow-highlight {
+    box-shadow: 0 0 40px rgba(255, 115, 54, 0.3);
   }
 
   .shadow-soft {
@@ -122,5 +166,269 @@
   /* Smooth transitions */
   .transition-base {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Grid overlays - ChainGPT inspired */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(110, 231, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(110, 231, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .bg-grid-sm {
+    background-image:
+      linear-gradient(to right, rgba(110, 231, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(110, 231, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bg-grid-lg {
+    background-image:
+      linear-gradient(to right, rgba(110, 231, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(110, 231, 255, 0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  .bg-grid-dots {
+    background-image: radial-gradient(circle, rgba(110, 231, 255, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Accent borders - thin 1px with glow */
+  .border-accent {
+    border: 1px solid rgba(110, 231, 255, 0.2);
+  }
+
+  .border-accent-glow {
+    border: 1px solid rgba(110, 231, 255, 0.3);
+    box-shadow: 0 0 8px rgba(110, 231, 255, 0.15);
+  }
+
+  .border-accent-bright {
+    border: 1px solid rgba(110, 231, 255, 0.4);
+    box-shadow: 0 0 12px rgba(110, 231, 255, 0.2);
+  }
+
+  .border-t-accent {
+    border-top: 1px solid rgba(110, 231, 255, 0.2);
+  }
+
+  .border-b-accent {
+    border-bottom: 1px solid rgba(110, 231, 255, 0.2);
+  }
+
+  .border-l-accent {
+    border-left: 1px solid rgba(110, 231, 255, 0.2);
+  }
+
+  .border-r-accent {
+    border-right: 1px solid rgba(110, 231, 255, 0.2);
+  }
+
+  /* Violet variant borders */
+  .border-violet {
+    border: 1px solid rgba(167, 139, 250, 0.2);
+  }
+
+  .border-violet-glow {
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    box-shadow: 0 0 8px rgba(167, 139, 250, 0.15);
+  }
+
+  /* Highlight variant borders */
+  .border-highlight {
+    border: 1px solid rgba(255, 115, 54, 0.2);
+  }
+
+  .border-highlight-glow {
+    border: 1px solid rgba(255, 115, 54, 0.3);
+    box-shadow: 0 0 8px rgba(255, 115, 54, 0.15);
+  }
+
+  /* Divider lines with gradient */
+  .divider-accent {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(110, 231, 255, 0.3) 50%,
+      transparent
+    );
+  }
+
+  .divider-accent-vertical {
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(110, 231, 255, 0.3) 50%,
+      transparent
+    );
+  }
+
+  /* Neon glass effect - ChainGPT style cards */
+  .glass-card {
+    background: rgba(15, 17, 22, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(110, 231, 255, 0.15);
+    box-shadow:
+      0 0 20px rgba(110, 231, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-card-hover {
+    background: rgba(15, 17, 22, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(110, 231, 255, 0.15);
+    box-shadow:
+      0 0 20px rgba(110, 231, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card-hover:hover {
+    border-color: rgba(110, 231, 255, 0.3);
+    box-shadow:
+      0 0 30px rgba(110, 231, 255, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Text effect utilities - ReactBits inspired */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-neural {
+    background: var(--gradient-neural);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(110, 231, 255, 0.6),
+                 0 0 40px rgba(110, 231, 255, 0.3);
+  }
+
+  .text-glow-violet {
+    text-shadow: 0 0 20px rgba(167, 139, 250, 0.6),
+                 0 0 40px rgba(167, 139, 250, 0.3);
+  }
+
+  .text-glow-highlight {
+    text-shadow: 0 0 20px rgba(255, 115, 54, 0.6),
+                 0 0 40px rgba(255, 115, 54, 0.3);
+  }
+
+  /* Shimmer effect for loading states */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  .text-shimmer {
+    background: linear-gradient(90deg,
+      var(--dim) 0%,
+      var(--text) 50%,
+      var(--dim) 100%);
+    background-size: 1000px 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* Gradient text utilities - ReactBits inspired */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .animated-gradient-text {
+    background: linear-gradient(
+      90deg,
+      var(--accent-a) 0%,
+      var(--accent-b) 25%,
+      var(--highlight) 50%,
+      var(--accent-b) 75%,
+      var(--accent-a) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Text glow effects */
+  .text-glow {
+    text-shadow: 0 0 20px rgba(110, 231, 255, 0.5);
+  }
+
+  .text-glow-violet {
+    text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+  }
+
+  .text-glow-highlight {
+    text-shadow: 0 0 20px rgba(255, 115, 54, 0.5);
+  }
+
+  /* Enhanced gradient backgrounds */
+  .bg-gradient-neural {
+    background: var(--gradient-neural);
+  }
+
+  .bg-gradient-mesh {
+    background: var(--gradient-mesh);
+  }
+
+  .bg-gradient-glow {
+    background: var(--gradient-glow);
+  }
+}
+
+/* Disable grain texture, animations, and effects for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    display: none;
+  }
+
+  .bg-grid,
+  .bg-grid-sm,
+  .bg-grid-lg,
+  .bg-grid-dots {
+    background-image: none;
+  }
+
+  .glass-card-hover:hover {
+    transform: none;
+  }
+
+  .text-shimmer {
+    animation: none;
+    background: var(--text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-glow,
+  .text-glow-violet,
+  .text-glow-highlight {
+    text-shadow: none;
   }
 }
