@@ -6,6 +6,7 @@ import ApiStatusBanner from "@/components/ApiStatusBanner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { LenisScroll } from "@/lib/lenis-scroll";
+import WebVitals from "@/components/WebVitals";
 
 // Font configurations
 const inter = Inter({
@@ -134,6 +135,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen bg-bg text-text font-sans flex flex-col antialiased">
+        <WebVitals />
         <LenisScroll />
         <a href="#main-content" className="skip-to-main">
           Skip to main content

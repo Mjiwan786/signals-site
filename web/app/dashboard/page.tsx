@@ -22,7 +22,7 @@ export default function DashboardPage() {
       <div className="space-y-12">
         {/* PnL Chart Section */}
         <section>
-          <PnLChart n={500} />
+          <PnLChart initialN={500} />
         </section>
 
         {/* Live Signal Ticker */}

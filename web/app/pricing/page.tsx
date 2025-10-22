@@ -1,194 +1,369 @@
-import { CheckIcon } from '@radix-ui/react-icons';
-import { DISCORD_INVITE } from '@/lib/env';
+/**
+ * Pricing Page - Stripe Integration
+ * Features: 3 tiers (Free/Pro/Elite), Motion animations, Stripe Checkout
+ * CTA → /api/checkout server action
+ * Step 12: Error boundary protection
+ */
 
-export default function PricingPage() {
-  const plans = [
-    {
-      name: 'Starter',
-      price: '$29',
-      period: '/month',
-      description: 'Perfect for beginners exploring AI signals',
-      features: [
-        'Up to 10 signals per day',
-        'Basic market analysis',
-        'Discord community access',
-        'Email notifications',
-        'Mobile-responsive dashboard',
-        '7-day money-back guarantee'
-      ],
-      popular: false,
-    },
-    {
-      name: 'Pro',
-      price: '$79',
-      period: '/month',
-      description: 'Most popular for serious traders',
-      features: [
-        'Unlimited AI signals',
-        'Advanced market analysis',
-        'Real-time Discord alerts',
-        'Priority support',
-        'API access',
-        'Custom risk parameters',
-        'Advanced charting tools',
-        'Private Discord channels'
-      ],
-      popular: true,
-    },
-    {
-      name: 'Team',
-      price: '$199',
-      period: '/month',
-      description: 'For professional trading teams',
-      features: [
-        'Everything in Pro',
-        'Up to 5 team members',
-        'Dedicated account manager',
-        'Custom integrations',
-        'Advanced analytics dashboard',
-        'Multi-user management',
-        'SLA guarantee (99.9%)',
-        'Private Discord server'
-      ],
-      popular: false,
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Activity, Check, X } from 'lucide-react';
+import PricingCard, { type PricingTier } from '@/components/PricingCard';
+import { staggerContainer, fadeInUp } from '@/lib/motion-variants';
+import { DISCORD_INVITE } from '@/lib/env';
+import PageErrorBoundary from '@/components/PageErrorBoundary';
+import { performanceMark } from '@/components/WebVitals';
+
+const pricingTiers: PricingTier[] = [
+  {
+    id: 'free',
+    name: 'Free',
+    price: 0,
+    period: 'month',
+    description: 'Perfect for exploring AI-powered signals and getting started',
+    icon: 'zap',
+    features: [
+      'Up to 10 signals per day',
+      'Basic market analysis',
+      'Discord community access',
+      'Email notifications',
+      'Mobile-responsive interface',
+      'Public channel access',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 79,
+    period: 'month',
+    description: 'Most popular for serious traders seeking consistent alpha',
+    icon: 'star',
+    highlighted: true,
+    badge: 'Most Popular',
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
+    features: [
+      'Unlimited AI signals (24/7)',
+      'Advanced market analysis',
+      'Real-time Discord alerts',
+      'Priority support (< 2hr response)',
+      'API access for automation',
+      'Custom risk parameters',
+      'Advanced charting tools',
+      'Private Discord channels',
+      'Backtesting & analytics',
+    ],
+  },
+  {
+    id: 'elite',
+    name: 'Elite',
+    price: 199,
+    period: 'month',
+    description: 'For professional traders and teams demanding institutional-grade tools',
+    icon: 'trending',
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE,
+    features: [
+      'Everything in Pro',
+      'Up to 5 team members',
+      'Dedicated account manager',
+      'Custom integrations (TradingView, MT4)',
+      'Advanced analytics dashboard',
+      'Multi-user role management',
+      'SLA guarantee (99.9% uptime)',
+      'Private Discord server',
+      'White-glove onboarding',
+      '1-on-1 strategy consultation',
+    ],
+  },
+];
+
+const comparisonFeatures = [
+  { name: 'Signals per day', free: '10', pro: 'Unlimited', elite: 'Unlimited' },
+  { name: 'Market analysis', free: 'Basic', pro: 'Advanced', elite: 'Institutional' },
+  { name: 'Discord access', free: true, pro: true, elite: true },
+  { name: 'Real-time alerts', free: false, pro: true, elite: true },
+  { name: 'API access', free: false, pro: true, elite: true },
+  { name: 'Priority support', free: false, pro: true, elite: true },
+  { name: 'Team members', free: '1', pro: '1', elite: '5' },
+  { name: 'Account manager', free: false, pro: false, elite: true },
+  { name: 'Custom integrations', free: false, pro: false, elite: true },
+  { name: 'SLA guarantee', free: false, pro: false, elite: true },
+];
+
+function PricingPageContent() {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
+
+  useEffect(() => {
+    performanceMark('pricing:mount');
+  }, []);
+
+  const handleTierSelect = async (tierId: string) => {
+    const tier = pricingTiers.find((t) => t.id === tierId);
+    if (!tier) return;
+
+    // Free tier - redirect to Discord
+    if (tier.id === 'free') {
+      window.open(DISCORD_INVITE, '_blank');
+      return;
     }
-  ];
+
+    // Paid tiers - Stripe Checkout
+    setIsProcessing(true);
+    setSelectedTier(tierId);
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId: tier.stripePriceId,
+          tierId: tier.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Failed to start checkout. Please try again or contact support.'
+      );
+      setIsProcessing(false);
+      setSelectedTier(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-elev to-bg py-16 border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
+    <div className="min-h-screen bg-bg">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-grid-sm opacity-20 pointer-events-none" aria-hidden="true" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+        {/* Page Header */}
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 rounded-full mb-6">
+            <Activity className="w-4 h-4 text-accent animate-pulse" />
+            <span className="text-sm font-medium text-accent">Transparent Pricing</span>
+          </div>
+
+          <h1 className="text-4xl md:text-6xl font-display font-bold text-text mb-6">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-text2 max-w-2xl mx-auto mb-8">
-            Select the perfect plan for your trading needs. All plans include AI-powered signals with transparent performance tracking.
+          <p className="text-xl text-text2 max-w-3xl mx-auto leading-relaxed">
+            Select the perfect plan for your trading needs. All plans include AI-powered signals
+            with transparent performance tracking and real-time Discord alerts.
           </p>
+        </motion.div>
 
-          {/* Stripe Coming Soon Notice */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 rounded-lg text-sm text-accent mb-8">
-            <span className="font-semibold">Stripe checkout via signals-api</span>
-            <span className="text-dim">•</span>
-            <span className="text-text2">Coming Soon</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Pricing Cards */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className={`relative p-8 bg-surface border rounded-xl transition-all duration-300 hover:shadow-glow ${
-                plan.popular
-                  ? 'border-accent shadow-glow scale-105'
-                  : 'border-border hover:border-accent/50'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-4 py-1 bg-gradient-brand text-white text-xs font-semibold rounded-full shadow-glow">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              {/* Plan Header */}
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-text mb-2">{plan.name}</h3>
-                <p className="text-sm text-text2 mb-6">{plan.description}</p>
-                <div className="flex items-baseline justify-center">
-                  <span className="text-5xl font-bold text-text">{plan.price}</span>
-                  <span className="text-text2 ml-2">{plan.period}</span>
-                </div>
-              </div>
-
-              {/* Features List */}
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-start gap-3">
-                    <CheckIcon className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-text2">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <a
-                href={DISCORD_INVITE}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`block w-full py-3 px-6 rounded-lg font-semibold text-center transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50 ${
-                  plan.popular
-                    ? 'bg-gradient-brand text-white shadow-soft hover:shadow-glow'
-                    : 'bg-elev text-text border-2 border-border hover:border-accent hover:bg-surface'
-                }`}
-              >
-                Join Discord
-              </a>
-            </div>
+        {/* Pricing Cards */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          {pricingTiers.map((tier, index) => (
+            <PricingCard
+              key={tier.id}
+              tier={tier}
+              onSelect={handleTierSelect}
+              isLoading={isProcessing && selectedTier === tier.id}
+              index={index}
+            />
           ))}
-        </div>
+        </motion.div>
+
+        {/* Comparison Table */}
+        <motion.div
+          className="mb-20"
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <h2 className="text-3xl font-bold text-text text-center mb-12">
+            Compare Plans
+          </h2>
+
+          <div className="glass-card rounded-2xl p-8 overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-4 px-4 text-text2 font-semibold">Feature</th>
+                  <th className="text-center py-4 px-4 text-text font-bold">Free</th>
+                  <th className="text-center py-4 px-4 text-text font-bold">
+                    <div className="inline-flex items-center gap-2">
+                      Pro
+                      <div className="px-2 py-0.5 bg-accent/20 text-accent text-xs font-bold rounded">
+                        Popular
+                      </div>
+                    </div>
+                  </th>
+                  <th className="text-center py-4 px-4 text-text font-bold">Elite</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonFeatures.map((feature, idx) => (
+                  <tr key={idx} className="border-b border-border/50 hover:bg-surface/50 transition-colors">
+                    <td className="py-4 px-4 text-text2">{feature.name}</td>
+                    <td className="py-4 px-4 text-center">
+                      {typeof feature.free === 'boolean' ? (
+                        feature.free ? (
+                          <Check className="w-5 h-5 text-success mx-auto" />
+                        ) : (
+                          <X className="w-5 h-5 text-dim mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-text">{feature.free}</span>
+                      )}
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      {typeof feature.pro === 'boolean' ? (
+                        feature.pro ? (
+                          <Check className="w-5 h-5 text-success mx-auto" />
+                        ) : (
+                          <X className="w-5 h-5 text-dim mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-text font-semibold">{feature.pro}</span>
+                      )}
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      {typeof feature.elite === 'boolean' ? (
+                        feature.elite ? (
+                          <Check className="w-5 h-5 text-success mx-auto" />
+                        ) : (
+                          <X className="w-5 h-5 text-dim mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-text font-semibold">{feature.elite}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
 
         {/* FAQ Section */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <motion.div
+          className="max-w-4xl mx-auto mb-20"
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           <h2 className="text-3xl font-bold text-text text-center mb-12">
             Frequently Asked Questions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-6 bg-surface border border-border rounded-lg">
-              <h3 className="text-lg font-semibold text-text mb-3">How do I get started?</h3>
-              <p className="text-sm text-text2">
-                Click "Join Discord" on any plan to join our community. Once verified, you'll get immediate access to your tier's channels and signals.
-              </p>
-            </div>
-            <div className="p-6 bg-surface border border-border rounded-lg">
-              <h3 className="text-lg font-semibold text-text mb-3">Can I upgrade later?</h3>
-              <p className="text-sm text-text2">
-                Yes! You can upgrade your plan anytime via Discord. Contact our support team and we'll handle the transition seamlessly.
-              </p>
-            </div>
-            <div className="p-6 bg-surface border border-border rounded-lg">
-              <h3 className="text-lg font-semibold text-text mb-3">What payment methods do you accept?</h3>
-              <p className="text-sm text-text2">
-                Currently, subscriptions are managed through Discord. Stripe checkout integration is coming soon for credit/debit cards and more options.
-              </p>
-            </div>
-            <div className="p-6 bg-surface border border-border rounded-lg">
-              <h3 className="text-lg font-semibold text-text mb-3">Is there a free trial?</h3>
-              <p className="text-sm text-text2">
-                We offer limited free signals in our public Discord channels. Join to see our signals in action before committing to a paid plan.
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* CTA Section */}
-        <div className="text-center p-12 bg-gradient-to-br from-surface via-elev to-surface border border-border rounded-2xl shadow-glow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                q: 'How do I get started?',
+                a: 'Click "Get Started" for free access, or "Subscribe Now" for Pro/Elite. You\'ll be redirected to secure Stripe checkout for paid plans.',
+              },
+              {
+                q: 'Can I upgrade or downgrade?',
+                a: 'Yes! You can upgrade or downgrade your plan anytime from your dashboard. Changes take effect immediately.',
+              },
+              {
+                q: 'What payment methods do you accept?',
+                a: 'We accept all major credit cards, debit cards, and digital wallets via Stripe (Visa, Mastercard, Amex, Google Pay, Apple Pay).',
+              },
+              {
+                q: 'Is there a free trial for paid plans?',
+                a: 'Start with our Free plan to test signals. We offer a 7-day money-back guarantee on all paid subscriptions.',
+              },
+              {
+                q: 'How do signals work?',
+                a: 'Our AI analyzes market data 24/7 and generates signals with entry, stop-loss, and take-profit levels. You receive instant Discord notifications.',
+              },
+              {
+                q: 'What\'s your refund policy?',
+                a: '7-day full refund for Pro/Elite plans, no questions asked. Cancel anytime via dashboard or Discord.',
+              },
+            ].map((faq, idx) => (
+              <div key={idx} className="glass-card-hover rounded-xl p-6 border border-border">
+                <h3 className="text-lg font-semibold text-text mb-3">{faq.q}</h3>
+                <p className="text-sm text-text2 leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Final CTA */}
+        <motion.div
+          className="text-center glass-card rounded-2xl p-12 border-accent/30"
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           <h2 className="text-3xl font-bold text-text mb-4">
             Ready to Start Trading Smarter?
           </h2>
           <p className="text-lg text-text2 mb-8 max-w-2xl mx-auto">
-            Join our Discord community to access AI-powered signals and connect with thousands of traders.
+            Join thousands of traders using AI-powered signals to make better trading decisions.
           </p>
-          <a
-            href={DISCORD_INVITE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-brand rounded-lg shadow-soft hover:shadow-glow transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50"
-          >
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
-            </svg>
-            Join Discord Community
-          </a>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => handleTierSelect('free')}
+              className="px-8 py-4 bg-surface text-text border-2 border-border rounded-xl font-semibold hover:border-accent hover:bg-elev transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50"
+            >
+              Start Free
+            </button>
+            <button
+              onClick={() => handleTierSelect('pro')}
+              className="px-8 py-4 bg-gradient-brand text-white rounded-xl font-semibold shadow-soft hover:shadow-glow transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50"
+            >
+              Subscribe to Pro
+            </button>
+          </div>
+
           <p className="text-xs text-dim mt-6">
-            No credit card required • Instant access • Cancel anytime
+            No credit card required for Free plan • Cancel anytime • Secure checkout via Stripe
           </p>
+        </motion.div>
+
+        {/* Trust Indicators */}
+        <div className="mt-16 text-center">
+          <p className="text-sm text-dim mb-6">Trusted by traders worldwide</p>
+          <div className="flex flex-wrap items-center justify-center gap-8 opacity-50">
+            <div className="text-xs text-dim">🔒 SSL Encrypted</div>
+            <div className="text-xs text-dim">💳 Stripe Secure</div>
+            <div className="text-xs text-dim">📊 Real-time Data</div>
+            <div className="text-xs text-dim">🚀 99.9% Uptime</div>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <PageErrorBoundary pageName="Pricing" fallbackType="pricing">
+      <PricingPageContent />
+    </PageErrorBoundary>
   );
 }

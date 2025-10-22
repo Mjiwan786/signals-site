@@ -1,146 +1,180 @@
 'use client';
 
-import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { motion, useReducedMotion } from 'framer-motion';
-import { RocketIcon, TimerIcon, LockClosedIcon } from '@radix-ui/react-icons';
-import { fadeInUp, fadeIn, staggerContainer } from '@/lib/motion';
+import { TrendingUp, Zap, Shield, ArrowRight, MessageCircle } from 'lucide-react';
+import { fadeInUp, staggerContainer, hoverGlow } from '@/lib/motion-variants';
+
+// Dynamic import with SSR disabled for 3D component
+const Hero3D = dynamic(() => import('./Hero3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-64 h-64 rounded-full bg-gradient-radial opacity-30 blur-3xl" />
+    </div>
+  ),
+});
+
+// Smooth scroll to element
+const scrollToElement = (id: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
 
 export default function Hero() {
   const shouldReduceMotion = useReducedMotion();
+  const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || 'https://discord.gg/your-server';
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Animated Background - disabled for reduced motion */}
-      {!shouldReduceMotion && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Radial Gradient */}
-          <motion.div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full opacity-20"
-            style={{
-              background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.2) 40%, transparent 70%)',
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.3, 0.2],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
+    <div className="relative overflow-hidden bg-bg">
+      {/* Grid overlay - ChainGPT style */}
+      <div className="absolute inset-0 bg-grid pointer-events-none" aria-hidden="true" />
 
-          {/* Floating Dots */}
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-accent rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -30, 0],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
+      {/* Radial gradient mask for grid (fades at edges) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 120% 100% at 50% 0%, transparent 0%, rgba(11, 11, 15, 0.3) 50%, rgba(11, 11, 15, 0.9) 100%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* 3D Canvas Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-full md:w-1/2 h-full opacity-60">
+          <Hero3D />
         </div>
-      )}
+
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/80 to-transparent" />
+      </div>
+
+      {/* Accent glow spots */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {/* Top left glow */}
+        <div
+          className="absolute -top-40 -left-40 w-80 h-80 bg-accentA/10 rounded-full blur-3xl"
+          style={{ opacity: shouldReduceMotion ? 0.3 : 0.5 }}
+        />
+        {/* Bottom right glow */}
+        <div
+          className="absolute -bottom-40 -right-40 w-80 h-80 bg-accentB/10 rounded-full blur-3xl"
+          style={{ opacity: shouldReduceMotion ? 0.3 : 0.5 }}
+        />
+      </div>
 
       {/* Hero Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-32">
-        <motion.div
-          className="text-center space-y-8"
-          variants={fadeInUp}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Main Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-            <span className="bg-gradient-brand bg-clip-text text-transparent">
-              AI-Powered Crypto Signals.
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 md:py-32 lg:py-40">
+        <div className="max-w-4xl">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-surface/50 border border-accent/30 rounded-full mb-8 backdrop-blur-sm"
+          >
+            <Zap className="w-4 h-4 text-accentA" />
+            <span className="text-sm font-medium text-text2">
+              Live Trading Signals • <span className="text-accentA">&lt;500ms Latency</span>
             </span>
-            <br />
-            <span className="text-text">Clear PnL. Zero Guesswork.</span>
-          </h1>
+          </motion.div>
+
+          {/* Main Heading - Staggered animation */}
+          <motion.h1
+            className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-bold tracking-tight leading-[1.1] mb-6"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            <motion.div variants={fadeInUp} className="overflow-hidden">
+              <span className="inline-block text-gradient-neural">
+                AI-Powered Signals
+              </span>
+            </motion.div>
+            <motion.div variants={fadeInUp} className="overflow-hidden">
+              <span className="inline-block text-text text-glow">
+                for Crypto
+              </span>
+            </motion.div>
+          </motion.h1>
 
           {/* Subheading */}
-          <p className="text-lg md:text-xl text-text2 max-w-2xl mx-auto leading-relaxed">
-            Real-time AI predictions backed by proven performance. Track every trade,
-            see transparent P&amp;L, and make informed decisions with institutional-grade signals
-            delivered in &lt;500ms.
-          </p>
+          <motion.p
+            className="text-xl md:text-2xl text-dim max-w-2xl leading-relaxed mb-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            Real-time AI predictions with{' '}
+            <span className="text-text font-semibold">transparent P&L</span>,{' '}
+            <span className="text-text font-semibold">live performance tracking</span>, and
+            institutional-grade signals delivered at lightning speed.
+          </motion.p>
 
           {/* CTA Buttons */}
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.2 }}
+            className="flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
           >
+            {/* Primary CTA - View Live PnL */}
+            <button
+              onClick={() => scrollToElement('live-pnl')}
+              className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-white bg-gradient-brand rounded-xl shadow-glow hover:shadow-glow-violet hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50 overflow-hidden"
+              aria-label="Scroll to live PnL chart"
+            >
+              {/* Animated background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-accentA via-accentB to-highlight opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
+
+              {/* Button content */}
+              <TrendingUp className="w-5 h-5 relative z-10" aria-hidden="true" />
+              <span className="relative z-10">View Live PnL</span>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+
+              {/* Glow effect */}
+              <div className="absolute inset-0 blur-xl bg-gradient-brand opacity-50 group-hover:opacity-75 transition-opacity" aria-hidden="true" />
+            </button>
+
+            {/* Secondary CTA - Join Discord */}
             <a
-              href="https://discord.gg/your-server"
+              href={discordInvite}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-brand rounded-lg shadow-soft hover:shadow-glow transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50 min-w-[200px]"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-text bg-surface/50 border-2 border-accent/30 rounded-xl hover:border-accent hover:bg-surface hover:shadow-soft backdrop-blur-sm transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50"
               aria-label="Join our Discord community (opens in new tab)"
             >
-              <span className="relative z-10">Join Discord</span>
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-accentB to-accentA opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
+              <MessageCircle className="w-5 h-5 text-accentB" aria-hidden="true" />
+              <span>Join Discord</span>
+              <ArrowRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" aria-hidden="true" />
             </a>
-
-            <Link
-              href="/performance"
-              className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-text bg-surface border-2 border-border rounded-lg hover:border-accent hover:bg-elev transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/50 min-w-[200px]"
-            >
-              View Performance
-            </Link>
           </motion.div>
-        </motion.div>
 
-        {/* Trust Cards */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          <TrustCard
-            icon={<TimerIcon className="w-6 h-6" />}
-            label="&lt;500ms Publish"
-          />
-          <TrustCard
-            icon={<RocketIcon className="w-6 h-6" />}
-            label="99.5% Uptime Target"
-          />
-          <TrustCard
-            icon={<LockClosedIcon className="w-6 h-6" />}
-            label="Redis TLS + Risk Guards"
-          />
-        </motion.div>
+          {/* Trust indicators */}
+          <motion.div
+            className="flex flex-wrap items-center gap-6 mt-10 text-sm text-dim"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <span>Live & Active</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-accentB" />
+              <span>Redis TLS Secured</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-highlight" />
+              <span>99.5% Uptime</span>
+            </div>
+          </motion.div>
+        </div>
+
       </div>
     </div>
-  );
-}
-
-function TrustCard({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <motion.div
-      className="flex flex-col items-center gap-3 p-6 bg-surface border border-border rounded-xl hover:border-accent/50 hover:shadow-soft transition-all duration-300"
-      variants={fadeInUp}
-    >
-      <div className="p-3 bg-elev rounded-lg text-accent" aria-hidden="true">
-        {icon}
-      </div>
-      <p className="text-sm font-medium text-text2 text-center">{label}</p>
-    </motion.div>
   );
 }

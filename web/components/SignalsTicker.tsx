@@ -1,19 +1,40 @@
-"use client";
-import { useEffect, useState, useRef } from "react";
-import type { SignalDTO } from "@/lib/api";
-import { API_BASE } from "@/lib/env";
-import { motion, AnimatePresence } from "framer-motion";
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  TrendingUp,
+  TrendingDown,
+  Zap,
+  Activity,
+  ArrowUpCircle,
+  ArrowDownCircle,
+} from 'lucide-react';
+import type { SignalDTO } from '@/lib/api';
+import { API_BASE } from '@/lib/env';
+
+/**
+ * SignalsTicker - Live streaming ticker bar with SSE connection
+ *
+ * Features:
+ * - Real-time SSE connection to /v1/signals/stream
+ * - Continuous horizontal marquee animation
+ * - Glowing ticker bar with brand colors
+ * - Multiple signal display with auto-scrolling
+ * - Connection status indicator
+ * - Pulse effect on new signals
+ */
 
 interface SignalsTickerProps {
-  mode?: "paper" | "live";
+  mode?: 'paper' | 'live';
 }
 
-export default function SignalsTicker({ mode = "paper" }: SignalsTickerProps) {
-  const [lastSignal, setLastSignal] = useState<SignalDTO | null>(null);
+export default function SignalsTicker({ mode = 'paper' }: SignalsTickerProps) {
+  const [signals, setSignals] = useState<SignalDTO[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const [showGlow, setShowGlow] = useState(false);
+  const [newSignalId, setNewSignalId] = useState<string | null>(null);
 
   useEffect(() => {
     // Create SSE connection
@@ -32,11 +53,16 @@ export default function SignalsTicker({ mode = "paper" }: SignalsTickerProps) {
       eventSource.onmessage = (event) => {
         try {
           const signal: SignalDTO = JSON.parse(event.data);
-          setLastSignal(signal);
 
-          // Trigger glow effect
-          setShowGlow(true);
-          setTimeout(() => setShowGlow(false), 2000);
+          // Add new signal to the beginning
+          setSignals((prev) => {
+            const updated = [signal, ...prev].slice(0, 20); // Keep last 20 signals
+            return updated;
+          });
+
+          // Trigger pulse effect
+          setNewSignalId(signal.id);
+          setTimeout(() => setNewSignalId(null), 2000);
         } catch (e) {
           console.error('Failed to parse SSE message:', e);
         }
@@ -45,21 +71,19 @@ export default function SignalsTicker({ mode = "paper" }: SignalsTickerProps) {
       eventSource.onerror = (err) => {
         console.error('SSE error:', err);
         setIsConnected(false);
-        setError('Connection lost. Attempting to reconnect...');
+        setError('Connection lost');
 
-        // EventSource will automatically reconnect, but we'll close and recreate after delay
+        // EventSource will automatically reconnect
         eventSource.close();
         setTimeout(() => {
           if (eventSourceRef.current === eventSource) {
-            // Reconnect after 5 seconds
             eventSourceRef.current = null;
           }
         }, 5000);
       };
-
     } catch (e) {
       console.error('Failed to create EventSource:', e);
-      setError('Failed to establish SSE connection');
+      setError('Failed to establish connection');
     }
 
     // Cleanup on unmount or mode change
@@ -71,138 +95,187 @@ export default function SignalsTicker({ mode = "paper" }: SignalsTickerProps) {
     };
   }, [mode]);
 
-  // Don't render if no signal and not connected (to avoid empty space)
-  if (!lastSignal && !isConnected && !error) {
+  // Don't render if no signals yet
+  if (signals.length === 0 && !error) {
     return null;
   }
 
   return (
-    <div className="w-full">
-      <AnimatePresence mode="wait">
-        {lastSignal && (
-          <motion.div
-            key={lastSignal.id}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.3 }}
-            className={`relative p-4 rounded-lg border transition-all duration-500 ${
-              showGlow
-                ? 'bg-accent/10 border-accent shadow-glow'
-                : 'bg-surface border-border'
-            }`}
-          >
-            {/* Connection Status Indicator */}
-            <div className="absolute top-2 right-2 flex items-center gap-2">
-              <span
-                className={`inline-block w-2 h-2 rounded-full ${
-                  isConnected ? 'bg-success animate-pulse' : 'bg-danger'
-                }`}
-              />
-              <span className="text-xs text-dim">
-                {isConnected ? 'Live' : 'Disconnected'}
-              </span>
-            </div>
+    <div className="relative w-full bg-gradient-to-r from-surface via-elev to-surface border-y border-accent/20 overflow-hidden">
+      {/* Glowing top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accentA to-transparent opacity-50" />
 
-            {/* Signal Content */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              {/* Left: Pair and Side */}
-              <div className="flex items-center gap-3">
-                <div>
-                  <div className="text-xs text-dim mb-1">Latest Signal</div>
-                  <div className="text-lg font-bold text-text">{lastSignal.pair}</div>
-                </div>
-                <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                    lastSignal.side?.toLowerCase() === 'buy'
-                      ? 'bg-success/20 text-success'
-                      : 'bg-danger/20 text-danger'
-                  }`}
-                >
-                  {lastSignal.side?.toUpperCase()}
-                </span>
-              </div>
+      {/* Glowing bottom accent line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accentB to-transparent opacity-50" />
 
-              {/* Middle: Entry, SL, TP */}
-              <div className="flex gap-4 text-sm">
-                <div>
-                  <div className="text-xs text-dim">Entry</div>
-                  <div className="text-text font-mono font-medium">
-                    {lastSignal.entry?.toFixed?.(4) ?? '-'}
-                  </div>
-                </div>
-                {lastSignal.sl && (
-                  <div>
-                    <div className="text-xs text-dim">SL</div>
-                    <div className="text-text2 font-mono">
-                      {lastSignal.sl.toFixed(4)}
-                    </div>
-                  </div>
-                )}
-                {lastSignal.tp && (
-                  <div>
-                    <div className="text-xs text-dim">TP</div>
-                    <div className="text-text2 font-mono">
-                      {lastSignal.tp.toFixed(4)}
-                    </div>
-                  </div>
-                )}
-              </div>
+      {/* Background pulse effect */}
+      <div
+        className="absolute inset-0 bg-gradient-to-r from-accentA/5 via-transparent to-accentB/5 animate-pulse opacity-30"
+        aria-hidden="true"
+      />
 
-              {/* Right: Confidence and Time */}
-              <div className="flex items-center gap-4">
-                <div>
-                  <div className="text-xs text-dim">Confidence</div>
-                  <span
-                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
-                      (lastSignal.confidence || 0) >= 0.8
-                        ? 'bg-success/20 text-success'
-                        : (lastSignal.confidence || 0) >= 0.6
-                        ? 'bg-accent/20 text-accent'
-                        : 'bg-danger/20 text-danger'
-                    }`}
-                  >
-                    {lastSignal.confidence
-                      ? (lastSignal.confidence * 100).toFixed(1)
-                      : '-'}%
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-dim">Time</div>
-                  <div className="text-text2 text-sm">
-                    {lastSignal.ts
-                      ? new Date(lastSignal.ts * 1000).toLocaleTimeString()
-                      : '-'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Strategy */}
-            {lastSignal.strategy && (
-              <div className="mt-3 pt-3 border-t border-border">
-                <span className="text-xs text-dim">Strategy:</span>{' '}
-                <span className="text-xs text-text2">{lastSignal.strategy}</span>
-              </div>
+      <div className="relative flex items-center py-3 px-6">
+        {/* Live Indicator */}
+        <div className="flex items-center gap-2 pr-6 border-r border-accent/30 flex-shrink-0">
+          <div className="relative">
+            <Zap className="w-4 h-4 text-accentA" />
+            {isConnected && (
+              <div className="absolute inset-0 blur-sm bg-accentA opacity-50 animate-pulse" />
             )}
-          </motion.div>
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider text-text2">
+            Live Signals
+          </span>
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? 'bg-success animate-pulse' : 'bg-danger'
+            }`}
+          />
+        </div>
+
+        {/* Error State */}
+        {error && signals.length === 0 && (
+          <div className="flex items-center gap-2 px-6 text-sm text-danger">
+            <Activity className="w-4 h-4" />
+            {error}
+          </div>
         )}
-      </AnimatePresence>
 
-      {/* Error State */}
-      {error && !lastSignal && (
-        <div className="p-3 rounded-lg bg-danger/10 border border-danger/50 text-danger text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Connecting State */}
-      {!isConnected && !error && !lastSignal && (
-        <div className="p-3 rounded-lg bg-surface border border-border text-text2 text-sm flex items-center gap-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent"></div>
-          Connecting to live signal stream...
-        </div>
-      )}
+        {/* Scrolling Ticker Container */}
+        {signals.length > 0 && (
+          <div className="flex-1 overflow-hidden ml-6">
+            <motion.div
+              className="flex gap-8"
+              animate={{
+                x: [0, -1000],
+              }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: 'loop',
+                  duration: 40,
+                  ease: 'linear',
+                },
+              }}
+            >
+              {/* Duplicate signals array for seamless loop */}
+              {[...signals, ...signals].map((signal, index) => (
+                <TickerItem
+                  key={`${signal.id}-${index}`}
+                  signal={signal}
+                  isNew={signal.id === newSignalId && index < signals.length}
+                />
+              ))}
+            </motion.div>
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+// Individual ticker item component
+function TickerItem({
+  signal,
+  isNew,
+}: {
+  signal: SignalDTO;
+  isNew: boolean;
+}) {
+  const isBuy = signal.side?.toLowerCase() === 'buy';
+
+  return (
+    <motion.div
+      className={`flex items-center gap-3 px-4 py-1 rounded-lg border transition-all duration-500 flex-shrink-0 ${
+        isNew
+          ? 'bg-accentA/10 border-accentA/50 shadow-glow'
+          : 'bg-surface/50 border-accent/20'
+      }`}
+      animate={
+        isNew
+          ? {
+              scale: [1, 1.05, 1],
+              boxShadow: [
+                '0 0 0px rgba(110, 231, 255, 0)',
+                '0 0 20px rgba(110, 231, 255, 0.5)',
+                '0 0 0px rgba(110, 231, 255, 0)',
+              ],
+            }
+          : {}
+      }
+      transition={{ duration: 2 }}
+    >
+      {/* Pair */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-bold text-text">{signal.pair}</span>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-4 bg-accent/30" />
+
+      {/* Side Badge */}
+      <div
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold ${
+          isBuy
+            ? 'bg-success/20 text-success'
+            : 'bg-danger/20 text-danger'
+        }`}
+      >
+        {isBuy ? (
+          <ArrowUpCircle className="w-3 h-3" />
+        ) : (
+          <ArrowDownCircle className="w-3 h-3" />
+        )}
+        {signal.side?.toUpperCase()}
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-4 bg-accent/30" />
+
+      {/* Entry Price */}
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-dim">@</span>
+        <span className="text-sm font-mono font-semibold text-text">
+          ${signal.entry?.toFixed?.(4) ?? '-'}
+        </span>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-4 bg-accent/30" />
+
+      {/* Confidence */}
+      <div className="flex items-center gap-1">
+        <TrendingUp className="w-3 h-3 text-accentA" />
+        <span
+          className={`text-xs font-bold ${
+            (signal.confidence || 0) >= 0.8
+              ? 'text-success'
+              : (signal.confidence || 0) >= 0.6
+              ? 'text-accentA'
+              : 'text-highlight'
+          }`}
+        >
+          {signal.confidence
+            ? `${(signal.confidence * 100).toFixed(0)}%`
+            : '-'}
+        </span>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-4 bg-accent/30" />
+
+      {/* Time */}
+      <div className="flex items-center gap-1">
+        <Activity className="w-3 h-3 text-dim" />
+        <span className="text-xs text-dim">
+          {signal.ts
+            ? new Date(signal.ts * 1000).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : '-'}
+        </span>
+      </div>
+    </motion.div>
   );
 }

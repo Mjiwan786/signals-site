@@ -1,0 +1,25 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "@next/next/no-html-link-for-pages": "off",
+    "react/no-unescaped-entities": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "warn",
+          {
+            "patterns": [
+              {
+                "group": ["fs", "path", "crypto", "child_process"],
+                "message": "Server-side modules should not be imported in client components. Ensure 'use client' is not present or move logic to API routes."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

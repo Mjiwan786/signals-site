@@ -101,38 +101,47 @@ export default function Navbar() {
             {navLinks.map((link) => {
               const isActive = pathname === link.href || pathname?.startsWith(link.href + "/");
               return (
-                <Link
+                <motion.div
                   key={link.href}
-                  href={link.href}
-                  className={clsx(
-                    "relative text-sm font-medium transition-all px-4 py-2 rounded-lg",
-                    "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface",
-                    isActive
-                      ? "text-accentA bg-accentA/10 border border-accent-glow"
-                      : "text-text2 hover:text-text hover:bg-surface/50"
-                  )}
-                  aria-current={isActive ? "page" : undefined}
-                  role="listitem"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                 >
-                  {link.label}
-                  {isActive && (
-                    <span
-                      className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-gradient-brand shadow-glow"
-                      aria-hidden="true"
-                    />
-                  )}
-                </Link>
+                  <Link
+                    href={link.href}
+                    className={clsx(
+                      "relative text-sm font-medium transition-all px-4 py-2 rounded-lg block",
+                      "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface",
+                      isActive
+                        ? "text-accentA bg-accentA/10 border border-accent-glow"
+                        : "text-text2 hover:text-text hover:bg-surface/50"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                    role="listitem"
+                  >
+                    {link.label}
+                    {isActive && (
+                      <span
+                        className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-gradient-brand shadow-glow"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
 
           {/* Right: Glowing Discord CTA Button */}
-          <a
+          <motion.a
             href={discordInvite}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative px-5 py-2.5 bg-gradient-brand text-white text-sm font-semibold rounded-lg overflow-hidden transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface"
+            className="group relative px-5 py-2.5 bg-gradient-brand text-white text-sm font-semibold rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface"
             aria-label="Join our Discord community (opens in new tab)"
+            whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(110, 231, 255, 0.3)" }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-brand opacity-0 group-hover:opacity-100 blur-xl transition-opacity" aria-hidden="true" />
@@ -147,7 +156,7 @@ export default function Navbar() {
 
             {/* Subtle shadow */}
             <div className="absolute inset-0 shadow-glow opacity-50 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
-          </a>
+          </motion.a>
         </div>
       </div>
     </motion.nav>

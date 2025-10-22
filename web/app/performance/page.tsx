@@ -39,7 +39,7 @@ export default function PerformancePage() {
             </p>
           </div>
           <div className="w-full">
-            <PnLChart n={500} />
+            <PnLChart initialN={500} />
           </div>
         </section>
 
