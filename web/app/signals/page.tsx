@@ -18,13 +18,16 @@ import { fadeInUp, staggerContainer } from '@/lib/motion-variants';
 import { prefetchPnL } from '@/lib/hooks';
 import PageErrorBoundary from '@/components/PageErrorBoundary';
 import { performanceMark } from '@/components/WebVitals';
+import { markFMPStart, measureFMP } from '@/lib/performance-monitor';
 
 function SignalsPageContent() {
   const mode = (DEFAULT_MODE as 'paper' | 'live') || 'paper';
 
   // PRD Step 11: Prefetch PnL data for all timeframes
+  // PRD B3.2: Measure FMP ≤1s
   useEffect(() => {
     performanceMark('signals:mount');
+    markFMPStart('signals');
 
     prefetchPnL(50); // 1D
     prefetchPnL(200); // 1W
@@ -33,6 +36,16 @@ function SignalsPageContent() {
     prefetchPnL(5000); // ALL
 
     performanceMark('signals:data-prefetch-complete');
+
+    // Measure FMP when content is visible
+    setTimeout(() => {
+      const fmp = measureFMP('signals');
+      if (fmp && fmp <= 1000) {
+        console.log('✅ FMP requirement met:', fmp, 'ms ≤ 1000ms');
+      } else if (fmp) {
+        console.warn('⚠️ FMP threshold exceeded:', fmp, 'ms > 1000ms');
+      }
+    }, 100);
   }, []);
 
   return (

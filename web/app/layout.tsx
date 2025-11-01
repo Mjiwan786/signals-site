@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ApiGuard from "@/components/ApiGuard";
 import ApiStatusBanner from "@/components/ApiStatusBanner";
@@ -7,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { LenisScroll } from "@/lib/lenis-scroll";
 import WebVitals from "@/components/WebVitals";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { GA_ID } from "@/lib/analytics";
 
 // Font configurations
 const inter = Inter({
@@ -133,10 +136,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
+        {GA_ID && process.env.NODE_ENV === 'production' && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+              `}
+            </Script>
+          </>
+        )}
       </head>
       <body className="min-h-screen bg-bg text-text font-sans flex flex-col antialiased">
         <WebVitals />
         <LenisScroll />
+        <AnalyticsTracker />
         <a href="#main-content" className="skip-to-main">
           Skip to main content
         </a>

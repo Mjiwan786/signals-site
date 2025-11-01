@@ -25,7 +25,7 @@ export default function LiveFeed({ mode = 'paper', maxSignals = 50 }: LiveFeedPr
   const feedRef = useRef<HTMLDivElement>(null);
   const [newSignalCount, setNewSignalCount] = useState(0);
 
-  const { signals, isConnected, error, clearSignals } = useSignalsStream(
+  const { signals, isConnected, isLoadingHistory, error, clearSignals } = useSignalsStream(
     { mode },
     true // enabled
   );
@@ -163,8 +163,16 @@ export default function LiveFeed({ mode = 'paper', maxSignals = 50 }: LiveFeedPr
         aria-atomic="false"
         aria-relevant="additions"
       >
-        {/* Loading State */}
-        {!hasSignals && isConnected && (
+        {/* Loading State - Historical Data */}
+        {isLoadingHistory && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <LoadingSpinner size="lg" />
+            <p className="text-dim text-sm mt-4">Loading historical signals...</p>
+          </div>
+        )}
+
+        {/* Loading State - Waiting for Live Signals */}
+        {!hasSignals && !isLoadingHistory && isConnected && (
           <div className="flex flex-col items-center justify-center py-12">
             <LoadingSpinner size="lg" />
             <p className="text-dim text-sm mt-4">Waiting for signals...</p>

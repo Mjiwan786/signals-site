@@ -1,0 +1,130 @@
+Repo: signals-site (Next.js Front-End)
+
+Title: PRD-003 – Signals-Site Front-End SaaS Portal
+Version: 1.0
+Date: [Today]
+Owner: Front-End/Product UX Lead
+
+Executive Summary
+
+We will build and validate the SaaS front-end portal for end-users subscribing to our crypto-AI signal service. Built with Next.js + Tailwind, deployed to Vercel, it will integrate authentication (Discord via NextAuth), subscription flow (Stripe), and live signal streaming via SSE from the API. The front-end will display live signal dashboards (entry/exit events, PnL chart, historical data), user subscription status, and basic account management. Success: conversion rate (visitor → subscriber) > 5 % in beta, live signals rendering within 500 ms of publication, and zero major UI/UX bugs in first 100 user sessions.
+
+Problem Statement
+
+Without a polished front-end, users cannot easily subscribe, view live signals, or interpret the output of the core engine. This reduces adoption, trust, and monetization potential for the overall system.
+
+Goals & KPIs
+
+Live signal UI latency (API to UI render) median ≤ 400 ms.
+
+Subscription conversion: at least 5% of visited plans page result in paid subscription during beta.
+
+User satisfaction: net promoter score (NPS) after 1 month > 40.
+
+Uptime: front-end served with <0.1% error rate in first month.
+
+Scope
+
+In-scope:
+
+Landing page + pricing plans page + login (Discord) + subscription flow (Stripe).
+
+Dashboard page: live signal feed (SSE), historical signal table, basic PnL chart.
+
+Account page: view current plan, billing history, cancel/upgrade.
+
+UI/UX responsive for desktop and mobile.
+
+Logging of client-side errors, basic monitoring.
+
+Deployment with CI/CD to Vercel, versioning, rollback capability.
+
+Out-of-scope:
+
+Advanced analytics (heatmaps, deep backtesting) – planned for later.
+
+Mobile native apps.
+
+Arbitrage or advanced user tools (reserved for phase 2).
+
+Users & Personas
+
+Paid subscriber (trader): Logs in, sees live signals, interprets them to execute trades.
+
+Visitor / prospect: Browses plans, reads about the system, converts to subscriber.
+
+Product owner/UX designer: Tracks conversion funnel, user feedback, UI error logs.
+
+User Stories
+
+As a visitor, I want to see pricing tiers and features so I can decide if subscribing is worthwhile.
+
+As a subscriber, I want to view a live feed of signals with timestamps and details so I can act quickly.
+
+As a subscriber, I want to see my recent trades/history of signals and simple PnL chart so I can review how the system performs.
+
+As a subscriber, I want to upgrade/cancel my plan from my account page so I have control over billing.
+
+Functional Requirements
+
+The site shall offer OAuth login via Discord (NextAuth).
+
+The site shall integrate with Stripe to present pricing plans and handle subscription checkout.
+
+The dashboard shall connect to the /stream/signals SSE endpoint from the API and render a live list (new signals appear at top) with real-time updates.
+
+The dashboard shall also call /signals/historical endpoint and render a table of last 100 signals for user’s plan scope.
+
+The site shall display user account details: plan status, next billing date, billing history, logout.
+
+The site shall function responsively on desktop and mobile (breakpoint targets: ≥ 320px).
+
+Error tracking: client-side errors must be logged (e.g., Sentry) and alert on >5 errors/min.
+
+The site shall deploy via Vercel with automatic build/test on merge to main, and rollback capability.
+
+Non-Functional Requirements
+
+Latency: live signal UI update < 400 ms after API push.
+
+Performance: first meaningful paint ≤ 1 s on standard broadband (desktop).
+
+Reliability: UI handles disconnect/reconnect of SSE stream gracefully (with retry/back-off).
+
+Security: all endpoints via HTTPS, user tokens stored securely (not in localStorage plain), Content Security Policy (CSP) enabled.
+
+Maintainability: component library (Tailwind + React) consistent, code coverage ≥ 80% for critical components.
+
+Accessibility: pages must meet WCAG 2.1 AA standards (tab navigation, screen reader labels).
+
+Dependencies
+
+Next.js + Tailwind
+
+API endpoints from repo #2 (auth, SSE, historical signals)
+
+Stripe checkout integration
+
+Discord OAuth via NextAuth
+
+Client-side error tracking (Sentry or similar)
+
+Vercel deployment + CI/CD pipeline
+
+Risks & Mitigations
+
+Risk: Live signal feed floods UI causing lag or freeze. Mitigation: implement throttling, pagination, and UI buffer with max length.
+
+Risk: Subscription conversion too low. Mitigation: optimise landing page, test pricing/timing, A/B tests.
+
+Risk: UI error or disconnection leads to user frustration. Mitigation: show graceful error messages, automatic stream reconnect, analytics to capture errors quickly.
+
+Success Criteria / Acceptance Tests
+
+Visitor journey: landing → login → subscription checkout → dashboard displaying live signals completed without error.
+
+Live feed test: simulated 100 signals/min, UI remains responsive and live updates appear within ~400 ms.
+
+Upgrade flow: user upgrades plan, billing status updates in ≤60 seconds and features enabled accordingly.
+
+UI error rate logs <1% for first 100 user sessions, NPS survey after 1 month shows >40.

@@ -68,3 +68,4 @@ dump.rdb
 *.key
 *.cert
 credentials.json
+.vercel

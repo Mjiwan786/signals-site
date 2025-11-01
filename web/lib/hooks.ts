@@ -107,6 +107,8 @@ export function useHealth() {
 /**
  * Hook for real-time signals streaming via SSE
  * Manages connection lifecycle and reconnection logic
+ * PRD B3.1: Fetches historical signals on mount, then connects SSE for live updates
+ * PRD B3.2: Flood controls with batched updates (100 signals/min, no UI freeze)
  */
 export function useSignalsStream(
   opts: Partial<SignalsQuery> = {},
@@ -114,13 +116,76 @@ export function useSignalsStream(
 ) {
   const [signals, setSignals] = useState<SignalDTO[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const managerRef = useRef<SignalsStreamManager | null>(null);
 
-  // Callbacks for stream manager
-  const handleMessage = useCallback((signal: SignalDTO) => {
-    setSignals((prev) => [signal, ...prev].slice(0, 200)); // Keep last 200 signals
+  // Batch buffer for flood control (PRD B3.2: Handle 100 signals/min)
+  const batchBufferRef = useRef<SignalDTO[]>([]);
+  const batchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const BATCH_INTERVAL_MS = 500; // Update UI every 500ms max
+  const MAX_SIGNALS = 200; // Max signals to keep in memory
+
+  // Fetch historical signals on mount (PRD B3.1 requirement)
+  useEffect(() => {
+    if (!enabled) return;
+
+    const fetchHistorical = async () => {
+      try {
+        setIsLoadingHistory(true);
+        const historicalSignals = await getSignals({
+          mode: opts.mode || 'paper',
+          limit: opts.limit || 50,
+        });
+        setSignals(historicalSignals); // Populate with historical data
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch historical signals:', err);
+        setError(err instanceof Error ? err : new Error('Failed to fetch historical signals'));
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    fetchHistorical();
+  }, [enabled, opts.mode, opts.limit]);
+
+  // Flush batch buffer to state (throttled UI updates)
+  const flushBatch = useCallback(() => {
+    if (batchBufferRef.current.length === 0) return;
+
+    const newSignals = [...batchBufferRef.current];
+    batchBufferRef.current = [];
+
+    setSignals((prev) => {
+      // Prepend new signals, keep only MAX_SIGNALS
+      const updated = [...newSignals.reverse(), ...prev].slice(0, MAX_SIGNALS);
+      return updated;
+    });
   }, []);
+
+  // Callbacks for stream manager with batching
+  const handleMessage = useCallback((signal: SignalDTO) => {
+    // Add to batch buffer instead of immediate state update
+    batchBufferRef.current.push(signal);
+
+    // Schedule batch flush if not already scheduled
+    if (!batchTimerRef.current) {
+      batchTimerRef.current = setTimeout(() => {
+        flushBatch();
+        batchTimerRef.current = null;
+      }, BATCH_INTERVAL_MS);
+    }
+
+    // Immediate flush if buffer is too large (safety)
+    if (batchBufferRef.current.length >= 20) {
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+        batchTimerRef.current = null;
+      }
+      flushBatch();
+    }
+  }, [flushBatch]);
 
   const handleConnect = useCallback(() => {
     setIsConnected(true);
@@ -136,7 +201,7 @@ export function useSignalsStream(
     setIsConnected(false);
   }, []);
 
-  // Initialize stream manager
+  // Initialize stream manager for live updates
   useEffect(() => {
     if (!enabled) return;
 
@@ -153,16 +218,28 @@ export function useSignalsStream(
     return () => {
       manager.disconnect();
       managerRef.current = null;
+
+      // Clear batch timer on unmount
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+        batchTimerRef.current = null;
+      }
     };
   }, [enabled, opts.mode, handleMessage, handleError, handleConnect, handleDisconnect]);
 
   const clearSignals = useCallback(() => {
     setSignals([]);
+    batchBufferRef.current = [];
+    if (batchTimerRef.current) {
+      clearTimeout(batchTimerRef.current);
+      batchTimerRef.current = null;
+    }
   }, []);
 
   return {
     signals,
     isConnected,
+    isLoadingHistory,
     error,
     clearSignals,
   };

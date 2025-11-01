@@ -1,0 +1,205 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: ["18.x", "20.x", "22.x"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Lint code
+        working-directory: ./web
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./web
+        run: npm run test:ci
+        env:
+          CI: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        with:
+          file: ./web/coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: |
+            web/coverage/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Build application
+        working-directory: ./web
+        run: npm run build
+        env:
+          NODE_ENV: production
+          # Mock environment variables for build
+          NEXTAUTH_URL: https://example.com
+          NEXTAUTH_SECRET: test_secret_for_ci_build_only
+          NEXT_PUBLIC_API_URL: https://api.example.com
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: web/.next
+
+  type-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Type check
+        working-directory: ./web
+        run: npx tsc --noEmit
+
+  coverage-check:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: ./web
+        run: npm run test:cov
+        env:
+          CI: true
+
+      - name: Check coverage thresholds
+        working-directory: ./web
+        run: |
+          # Verify coverage meets ≥80% for critical front-end components
+          echo "Checking coverage thresholds..."
+          node -e "
+            const coverage = require('./coverage/coverage-summary.json');
+            const total = coverage.total;
+            console.log('Coverage Summary:');
+            console.log('  Lines: ' + total.lines.pct + '%');
+            console.log('  Statements: ' + total.statements.pct + '%');
+            console.log('  Functions: ' + total.functions.pct + '%');
+            console.log('  Branches: ' + total.branches.pct + '%');
+
+            if (total.lines.pct < 80 || total.statements.pct < 80 || total.functions.pct < 80 || total.branches.pct < 80) {
+              console.error('❌ Coverage below 80% threshold');
+              process.exit(1);
+            }
+            console.log('✅ Coverage meets ≥80% requirement');
+          "
+
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Start Next.js server
+        working-directory: ./web
+        run: |
+          npm run build
+          npm run start &
+          sleep 10
+        env:
+          NODE_ENV: production
+          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_SECRET: test_secret_for_e2e
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+
+      - name: Smoke test - Landing page
+        run: |
+          curl -f http://localhost:3000 || exit 1
+
+      - name: Smoke test - Pricing page
+        run: |
+          curl -f http://localhost:3000/pricing || exit 1
+
+      - name: Smoke test - API health
+        run: |
+          curl -f http://localhost:3000/api/signals || exit 1
+        continue-on-error: true  # API may require Redis

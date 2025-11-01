@@ -14,13 +14,15 @@ export interface PricingTier {
   id: string;
   name: string;
   price: number;
-  period: 'month' | 'year';
+  period: 'month' | 'year' | 'once';
   description: string;
   features: string[];
   highlighted?: boolean;
   badge?: string;
   stripePriceId?: string;
   icon?: 'zap' | 'star' | 'trending';
+  discordRole?: string;
+  discordRoleColor?: string;
 }
 
 interface PricingCardProps {
@@ -44,6 +46,7 @@ export default function PricingCard({
 }: PricingCardProps) {
   const Icon = tier.icon ? iconMap[tier.icon] : Zap;
   const isFree = tier.price === 0;
+  const isLifetime = tier.period === 'once';
 
   return (
     <motion.div
@@ -58,7 +61,7 @@ export default function PricingCard({
       `}
     >
       {/* Highlighted badge */}
-      {tier.highlighted && tier.badge && (
+      {tier.badge && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
           <div className="px-4 py-1.5 bg-gradient-brand text-white text-xs font-bold rounded-full shadow-glow uppercase tracking-wide">
             {tier.badge}
@@ -106,7 +109,20 @@ export default function PricingCard({
           </div>
 
           <h3 className="text-2xl font-bold text-text mb-2">{tier.name}</h3>
-          <p className="text-sm text-dim leading-relaxed">{tier.description}</p>
+          <p className="text-sm text-dim leading-relaxed mb-3">{tier.description}</p>
+
+          {/* Discord Role Badge */}
+          {tier.discordRole && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface/50 border border-border rounded-lg">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: tier.discordRoleColor }}
+              />
+              <span className="text-xs font-semibold text-text2">
+                Discord: {tier.discordRole}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Price */}
@@ -117,10 +133,15 @@ export default function PricingCard({
             </span>
             {!isFree && (
               <span className="text-text2 text-lg">
-                /{tier.period === 'year' ? 'yr' : 'mo'}
+                {isLifetime ? '' : `/${tier.period === 'year' ? 'yr' : 'mo'}`}
               </span>
             )}
           </div>
+          {isLifetime && (
+            <p className="text-xs text-success mt-1 font-semibold">
+              One-time payment • Lifetime access
+            </p>
+          )}
           {tier.period === 'year' && !isFree && (
             <p className="text-xs text-success mt-1">
               Save ${((tier.price / 12) * 12 * 0.2).toFixed(0)}/year

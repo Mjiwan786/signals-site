@@ -2,6 +2,7 @@
  * API Client for Signals-Site
  * Handles all backend communication with Zod validation
  * PRD: cache:"no-store", runtime errors surface non-blocking banners
+ * PRD B3.2: Error logging with Sentry placeholder
  */
 
 import { API_BASE } from './env';
@@ -19,6 +20,7 @@ import {
   PnLQuerySchema,
   safeParse,
 } from './types';
+import { logApiError } from './error-logger';
 
 /**
  * API Error class for better error handling
@@ -53,11 +55,13 @@ async function fetchJSON<T>(
     });
 
     if (!response.ok) {
-      throw new ApiError(
+      const apiError = new ApiError(
         `HTTP ${response.status}: ${response.statusText}`,
         response.status,
         response
       );
+      logApiError(apiError, url);
+      throw apiError;
     }
 
     const data = await response.json();
@@ -66,11 +70,13 @@ async function fetchJSON<T>(
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(
+    const apiError = new ApiError(
       error instanceof Error ? error.message : 'Unknown error',
       undefined,
       undefined
     );
+    logApiError(apiError, url);
+    throw apiError;
   }
 }
 
@@ -208,6 +214,8 @@ export class SignalsStreamManager {
 
       this.eventSource.onerror = (event) => {
         console.error('SSE connection error:', event);
+        const { logSSEError } = require('./error-logger');
+        logSSEError(new Error('SSE connection failed'), this.reconnectAttempts);
         this.handleDisconnect();
       };
     } catch (error) {
