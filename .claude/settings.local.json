@@ -67,7 +67,8 @@
       "Bash(vercel env:*)",
       "Bash(vercel link:*)",
       "Bash(vercel whoami:*)",
-      "Bash(vercel project:*)"
+      "Bash(vercel project:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
