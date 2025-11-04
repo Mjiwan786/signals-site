@@ -26,70 +26,47 @@ export default function SignalsPanel() {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
-  const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const connect = () => {
-    // Clean up existing connection
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
-
+  const fetchSignals = async () => {
     try {
-      const url = `${API_BASE_URL}/v1/stream`;
-      const eventSource = new EventSource(url);
-      eventSourceRef.current = eventSource;
-
-      eventSource.onopen = () => {
-        setIsConnected(true);
-        setError(null);
-        setReconnectAttempt(0);
-      };
-
-      eventSource.addEventListener('signal', (event) => {
-        try {
-          const signal: Signal = JSON.parse(event.data);
-          setSignals((prev) => {
-            const newSignals = [signal, ...prev];
-            return newSignals.slice(0, MAX_SIGNALS); // Keep only last 250
-          });
-        } catch (err) {
-          console.error('Failed to parse signal:', err);
-        }
+      const response = await fetch(`${API_BASE_URL}/v1/signals?mode=paper&limit=${MAX_SIGNALS}`, {
+        cache: 'no-store',
       });
 
-      eventSource.addEventListener('heartbeat', () => {
-        // Heartbeat received, connection is alive
-        setIsConnected(true);
-      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-      eventSource.onerror = (err) => {
-        console.error('EventSource error:', err);
-        setIsConnected(false);
-        setError('Connection lost');
-        eventSource.close();
-
-        // Attempt reconnection with backoff
-        const delay = RECONNECT_DELAYS[Math.min(reconnectAttempt, RECONNECT_DELAYS.length - 1)];
-        setReconnectAttempt((prev) => prev + 1);
-
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connect();
-        }, delay);
-      };
+      const data: Signal[] = await response.json();
+      setSignals(data.reverse()); // Reverse to show newest first
+      setIsConnected(true);
+      setError(null);
+      setReconnectAttempt(0);
     } catch (err) {
-      console.error('Failed to create EventSource:', err);
-      setError('Failed to connect');
+      console.error('Failed to fetch signals:', err);
+      setIsConnected(false);
+      setError('Connection error');
+
+      // Retry with backoff
+      const delay = RECONNECT_DELAYS[Math.min(reconnectAttempt, RECONNECT_DELAYS.length - 1)];
+      setReconnectAttempt((prev) => prev + 1);
+
+      reconnectTimeoutRef.current = setTimeout(() => {
+        fetchSignals();
+      }, delay);
     }
   };
 
   useEffect(() => {
-    connect();
+    // Initial fetch
+    fetchSignals();
+
+    // Poll every 10 seconds
+    const interval = setInterval(fetchSignals, 10000);
 
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      clearInterval(interval);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -142,7 +119,7 @@ export default function SignalsPanel() {
               } ${isConnected ? 'animate-pulse' : ''}`}
             />
             <span className="text-xs text-gray-400">
-              {isConnected ? 'Connected' : error || 'Connecting...'}
+              {isConnected ? 'Live • Updates every 10s' : error || 'Loading...'}
             </span>
           </div>
         </div>
