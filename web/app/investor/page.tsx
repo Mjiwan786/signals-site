@@ -1,36 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import SignalsPanel from '@/components/SignalsPanel';
 import PnLWidget from '@/components/PnLWidget';
 
 export default function InvestorPage() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if investor mode is enabled - check at runtime for client-side
-    // Temporarily enabled for testing - set to false to disable
-    const investorModeEnabled = true; // process.env.NEXT_PUBLIC_INVESTOR_MODE === 'true'
-    console.log('Investor mode check:', process.env.NEXT_PUBLIC_INVESTOR_MODE, investorModeEnabled);
-
-    if (investorModeEnabled) {
-      setIsAuthorized(true);
-    }
-    setIsLoading(false);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-accent/30 border-t-accent rounded-full animate-spin" />
-          <p className="text-text2">Loading investor dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  // Temporarily enabled unconditionally for testing
+  // To re-enable feature flag: check process.env.NEXT_PUBLIC_INVESTOR_MODE === 'true'
+  const isAuthorized = true;
 
   if (!isAuthorized) {
     return (
