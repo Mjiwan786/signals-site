@@ -432,3 +432,32 @@
     text-shadow: none;
   }
 }
+
+/* Custom scrollbar styles for tables and panels */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(26, 26, 36, 0.4);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(110, 231, 255, 0.2);
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(110, 231, 255, 0.4);
+  }
+
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(110, 231, 255, 0.2) rgba(26, 26, 36, 0.4);
+  }
+}

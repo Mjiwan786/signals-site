@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { Activity } from "lucide-react";
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import LiveStatusPill from './LiveStatusPill';
 
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "AI Predicted Signals";
 const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "#";
@@ -130,6 +131,11 @@ export default function Navbar() {
                 </motion.div>
               );
             })}
+          </div>
+
+          {/* Center-Right: LIVE Status Pill */}
+          <div className="hidden md:block">
+            <LiveStatusPill />
           </div>
 
           {/* Right: Glowing Discord CTA Button */}
