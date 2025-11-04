@@ -11,7 +11,8 @@ export default function InvestorPage() {
 
   useEffect(() => {
     // Check if investor mode is enabled - check at runtime for client-side
-    const investorModeEnabled = process.env.NEXT_PUBLIC_INVESTOR_MODE === 'true';
+    // Temporarily enabled for testing - set to false to disable
+    const investorModeEnabled = true; // process.env.NEXT_PUBLIC_INVESTOR_MODE === 'true'
     console.log('Investor mode check:', process.env.NEXT_PUBLIC_INVESTOR_MODE, investorModeEnabled);
 
     if (investorModeEnabled) {
