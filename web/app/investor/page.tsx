@@ -5,15 +5,16 @@ import { motion } from 'framer-motion';
 import SignalsPanel from '@/components/SignalsPanel';
 import PnLWidget from '@/components/PnLWidget';
 
-const INVESTOR_MODE_ENABLED = process.env.NEXT_PUBLIC_INVESTOR_MODE === 'true';
-
 export default function InvestorPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if investor mode is enabled
-    if (INVESTOR_MODE_ENABLED) {
+    // Check if investor mode is enabled - check at runtime for client-side
+    const investorModeEnabled = process.env.NEXT_PUBLIC_INVESTOR_MODE === 'true';
+    console.log('Investor mode check:', process.env.NEXT_PUBLIC_INVESTOR_MODE, investorModeEnabled);
+
+    if (investorModeEnabled) {
       setIsAuthorized(true);
     }
     setIsLoading(false);
