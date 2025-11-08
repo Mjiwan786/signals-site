@@ -116,11 +116,11 @@ export default function PerformancePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-5 bg-surface border border-border rounded-lg">
-              <div className="text-2xl font-bold text-text mb-1">68.4%</div>
+              <div className="text-2xl font-bold text-text mb-1">54.5%</div>
               <div className="text-xs text-dim uppercase tracking-wide">Win Rate</div>
             </div>
             <div className="p-5 bg-surface border border-border rounded-lg">
-              <div className="text-2xl font-bold text-text mb-1">1,247</div>
+              <div className="text-2xl font-bold text-text mb-1">442</div>
               <div className="text-xs text-dim uppercase tracking-wide">Total Trades</div>
             </div>
             <div className="p-5 bg-surface border border-border rounded-lg">

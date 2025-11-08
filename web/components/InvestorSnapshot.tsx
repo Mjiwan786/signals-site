@@ -32,8 +32,8 @@ export default function InvestorSnapshot() {
       return {
         mtdPnL: '+18.4%',
         mtdPnLVariant: 'success' as 'success' | 'danger' | 'default' | 'info',
-        winRate: '68.4%',
-        maxDrawdown: '12.3%',
+        winRate: '54.5%',
+        maxDrawdown: '38.8%',
       };
     }
 

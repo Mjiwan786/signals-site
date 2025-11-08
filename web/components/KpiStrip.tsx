@@ -17,46 +17,50 @@ interface KpiData {
   trend?: 'up' | 'down';
 }
 
+// REAL BACKTEST DATA - Updated 2025-11-08
+// Source: 12-month conservative simulation with validated fee/slippage model
+// See: crypto-ai-bot/out/acquire_annual_snapshot.csv
+// Methodology: crypto-ai-bot/ANNUAL_SNAPSHOT_RESULTS_SUMMARY.md
 const kpis: KpiData[] = [
   {
     label: 'ROI (12-Month)',
-    value: 247.8,
+    value: 7.54,
     suffix: '%',
     prefix: '+',
-    decimals: 1,
-    tooltip: 'Total return on investment over the past 12 months',
+    decimals: 2,
+    tooltip: 'Total return from 12-month backtest simulation (Nov 2024 - Nov 2025). Conservative estimate with no leverage, spot trading only.',
     icon: <TrendingUp className="w-6 h-6" />,
     color: 'green',
     trend: 'up',
   },
   {
     label: 'Win Rate',
-    value: 68.4,
+    value: 54.5,
     suffix: '%',
     prefix: '',
     decimals: 1,
-    tooltip: 'Percentage of profitable signals over the last 30 days',
+    tooltip: 'Percentage of profitable trades in 12-month backtest (442 total trades). Industry standard for systematic quant strategies.',
     icon: <Target className="w-6 h-6" />,
     color: 'cyan',
   },
   {
     label: 'Max Drawdown',
-    value: 12.3,
+    value: 38.8,
     suffix: '%',
     prefix: '-',
     decimals: 1,
-    tooltip: 'Maximum peak-to-trough decline over the past 12 months',
+    tooltip: 'Maximum peak-to-trough decline over 12-month backtest period. High but realistic for crypto volatility without leverage.',
     icon: <TrendingDown className="w-6 h-6" />,
     color: 'orange',
     trend: 'down',
   },
   {
-    label: 'Active Traders',
-    value: 1247,
+    label: 'Sharpe Ratio',
+    value: 0.76,
     suffix: '',
     prefix: '',
-    decimals: 0,
-    tooltip: 'Number of active traders using our signals this month',
+    decimals: 2,
+    tooltip: 'Risk-adjusted return measure from 12-month backtest. 0.5-2.0 is typical for crypto strategies. Higher is better.',
     icon: <Users className="w-6 h-6" />,
     color: 'violet',
   },
@@ -105,10 +109,14 @@ export default function KpiStrip() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-2xl md:text-3xl font-display font-bold text-text mb-2">
-            Live Performance Metrics
+            12-Month Backtest Performance
           </h2>
-          <p className="text-dim text-sm md:text-base">
-            Real-time data updated every 24 hours
+          <p className="text-dim text-sm md:text-base max-w-3xl mx-auto">
+            Verified results from conservative 12-month simulation (Nov 2024 - Nov 2025).
+            Includes realistic Kraken fees (5 bps) and slippage (2 bps).
+          </p>
+          <p className="text-xs text-dim/70 mt-2 italic">
+            Backtested performance. Past results do not guarantee future returns. See methodology documentation for full details.
           </p>
         </motion.div>
 

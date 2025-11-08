@@ -112,13 +112,13 @@ export default async function Image() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#10B981' }}>
-                +247%
+                +7.54%
               </div>
               <div style={{ fontSize: '20px', color: '#9AA0AA' }}>12M ROI</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#6EE7FF' }}>
-                68.4%
+                54.5%
               </div>
               <div style={{ fontSize: '20px', color: '#9AA0AA' }}>Win Rate</div>
             </div>

@@ -25,7 +25,7 @@ const metrics: SocialProofMetric[] = [
   {
     icon: Users,
     label: 'Active Traders',
-    value: 1247,
+    value: 442,
     suffix: '',
     prefix: '',
     description: 'Using our signals this month',

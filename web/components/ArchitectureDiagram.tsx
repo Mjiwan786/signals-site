@@ -52,7 +52,7 @@ const nodes: ArchitectureNode[] = [
     color: 'violet',
     metrics: [
       { label: 'Models', value: '12' },
-      { label: 'Accuracy', value: '68.4%' },
+      { label: 'Win Rate', value: '54.5%' },
       { label: 'Inference', value: '<100ms' },
     ],
   },
@@ -79,8 +79,8 @@ const nodes: ArchitectureNode[] = [
     icon: <TrendingUp className="w-8 h-8" />,
     color: 'green',
     metrics: [
-      { label: 'ROI (12M)', value: '+247.8%' },
-      { label: 'Max DD', value: '-12.3%' },
+      { label: 'ROI (12M)', value: '+7.54%' },
+      { label: 'Max DD', value: '-38.8%' },
       { label: 'Storage', value: 'Redis TLS' },
     ],
   },

@@ -34,7 +34,7 @@ const tradingPairs = [
 const trustMetrics = [
   { icon: Zap, label: 'Signal Latency', value: '<500ms', color: 'cyan' },
   { icon: Shield, label: 'Uptime', value: '99.8%', color: 'green' },
-  { icon: TrendingUp, label: 'Win Rate', value: '68.4%', color: 'violet' },
+  { icon: TrendingUp, label: 'Win Rate', value: '54.5%', color: 'violet' },
   { icon: Activity, label: 'Signals/Day', value: '120+', color: 'orange' },
 ]
 
