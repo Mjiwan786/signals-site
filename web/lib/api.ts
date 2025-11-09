@@ -81,8 +81,10 @@ async function fetchJSON<T>(
 }
 
 /**
- * Get PnL data points with fallback to client-side computation
- * PRD Step 11: API-first with client-side fallback
+ * Get PnL data points with fallback hierarchy:
+ * 1. Static backtest data (for transparent 12-month performance)
+ * 2. Live API endpoint
+ * 3. Client-side computation from signals
  *
  * @param n - Number of data points to fetch (default: 500)
  * @returns Array of PnL points with timestamp, equity, and daily_pnl
@@ -90,17 +92,40 @@ async function fetchJSON<T>(
 export async function getPnL(n: number = 500): Promise<PnLPoint[]> {
   const query = PnLQuerySchema.parse({ n });
 
+  // FIRST: Try loading static backtest data
+  // This provides the verified 12-month backtest results shown in KPIs
   try {
-    // Try API endpoint first
+    const response = await fetch('/api/backtest-pnl.json');
+    if (response.ok) {
+      const backtestData = await response.json();
+      console.log('Loaded static backtest PnL data:', backtestData.metadata);
+
+      // Use all data or resample to requested size
+      const data = backtestData.data || [];
+      if (data.length <= n || n >= 365) {
+        return data;
+      }
+
+      // Resample if needed
+      const { resamplePnLPoints } = await import('./pnl');
+      return resamplePnLPoints(data, n);
+    }
+  } catch (error) {
+    console.warn('Static backtest data not available:', error);
+  }
+
+  // SECOND: Try live API endpoint
+  try {
     return await fetchJSON(
       `${API_BASE}/v1/pnl?n=${query.n}`,
       PnLPointArraySchema
     );
   } catch (error) {
-    console.warn('PnL API endpoint unavailable, falling back to client-side computation:', error);
+    console.warn('PnL API endpoint unavailable:', error);
+  }
 
-    // Fallback: compute from signals
-    // Import dynamically to avoid circular dependencies
+  // THIRD: Fallback to client-side computation from signals
+  try {
     const { aggregateSignalsToPnL, DEFAULT_PNL_CONFIG, resamplePnLPoints } = await import('./pnl');
 
     // Fetch recent signals
@@ -119,6 +144,9 @@ export async function getPnL(n: number = 500): Promise<PnLPoint[]> {
     }
 
     return pnlPoints;
+  } catch (error) {
+    console.error('All PnL data sources failed:', error);
+    return [];
   }
 }
 
