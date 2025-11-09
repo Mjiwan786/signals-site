@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Activity } from "lucide-react";
+import { Activity, FlaskConical } from "lucide-react";
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import LiveStatusPill from './LiveStatusPill';
 
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "AI Predicted Signals";
 const discordInvite = process.env.NEXT_PUBLIC_DISCORD_INVITE || "#";
+const useStagingSignals = process.env.NEXT_PUBLIC_USE_STAGING_SIGNALS === 'true';
 
 const navLinks = [
   { href: "/signals", label: "Signals" },
@@ -133,9 +134,18 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Center-Right: LIVE Status Pill */}
-          <div className="hidden md:block">
+          {/* Center-Right: LIVE Status Pill & Staging Badge */}
+          <div className="hidden md:flex items-center gap-2">
             <LiveStatusPill />
+            {useStagingSignals && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/30 rounded-md text-yellow-500 text-xs font-semibold"
+                title="Using staging endpoint for multi-pair testing"
+              >
+                <FlaskConical className="w-3.5 h-3.5" aria-hidden="true" />
+                STAGING
+              </div>
+            )}
           </div>
 
           {/* Right: Glowing Discord CTA Button */}

@@ -11,6 +11,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_SITE_NAME: z.string().default('Signals'),
   NEXT_PUBLIC_STRIPE_PRICE_PRO: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PRICE_ELITE: z.string().optional(),
+  NEXT_PUBLIC_USE_STAGING_SIGNALS: z.string().transform(v => v === 'true').default('false'),
 });
 
 /**
@@ -25,6 +26,7 @@ function validateEnv() {
     NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
     NEXT_PUBLIC_STRIPE_PRICE_PRO: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
     NEXT_PUBLIC_STRIPE_PRICE_ELITE: process.env.NEXT_PUBLIC_STRIPE_PRICE_ELITE,
+    NEXT_PUBLIC_USE_STAGING_SIGNALS: process.env.NEXT_PUBLIC_USE_STAGING_SIGNALS,
   };
 
   try {
@@ -46,3 +48,4 @@ export const API_BASE = env.NEXT_PUBLIC_API_URL;
 export const DEFAULT_MODE = env.NEXT_PUBLIC_SIGNALS_MODE;
 export const DISCORD_INVITE = env.NEXT_PUBLIC_DISCORD_INVITE;
 export const SITE_NAME = env.NEXT_PUBLIC_SITE_NAME;
+export const USE_STAGING_SIGNALS = env.NEXT_PUBLIC_USE_STAGING_SIGNALS;

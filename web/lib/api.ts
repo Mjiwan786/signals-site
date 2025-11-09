@@ -5,7 +5,7 @@
  * PRD B3.2: Error logging with Sentry placeholder
  */
 
-import { API_BASE } from './env';
+import { API_BASE, USE_STAGING_SIGNALS } from './env';
 import {
   SignalDTO,
   SignalDTOSchema,
@@ -160,16 +160,25 @@ export async function getSignals(
 ): Promise<SignalDTO[]> {
   const query = SignalsQuerySchema.parse(opts);
   const params = new URLSearchParams({
-    mode: query.mode,
     limit: query.limit.toString(),
   });
+
+  // C1: Feature flag - use staging endpoint for multi-pair testing
+  const endpoint = USE_STAGING_SIGNALS
+    ? '/v1/signals/staging'
+    : '/v1/signals';
+
+  // Only add mode param for non-staging endpoint
+  if (!USE_STAGING_SIGNALS) {
+    params.set('mode', query.mode);
+  }
 
   if (query.pair) {
     params.set('pair', query.pair);
   }
 
   return fetchJSON(
-    `${API_BASE}/v1/signals?${params.toString()}`,
+    `${API_BASE}${endpoint}?${params.toString()}`,
     SignalDTOArraySchema
   );
 }
