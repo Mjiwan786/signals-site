@@ -95,7 +95,7 @@ export async function getPnL(n: number = 500): Promise<PnLPoint[]> {
   // FIRST: Try loading static backtest data
   // This provides the verified 12-month backtest results shown in KPIs
   try {
-    const response = await fetch('/api/backtest-pnl.json');
+    const response = await fetch('/data/backtest-pnl.json');
     if (response.ok) {
       const backtestData = await response.json();
       console.log('Loaded static backtest PnL data:', backtestData.metadata);
