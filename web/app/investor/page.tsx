@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import SignalsPanel from '@/components/SignalsPanel';
 import PnLWidget from '@/components/PnLWidget';
+import ProfitabilityMetrics from '@/components/ProfitabilityMetrics';
 
 export default function InvestorPage() {
   // Temporarily enabled unconditionally for testing
@@ -146,6 +147,16 @@ export default function InvestorPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-8">
+          {/* Profitability Metrics */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h2 className="text-2xl font-bold text-white mb-6">System Performance</h2>
+            <ProfitabilityMetrics />
+          </motion.div>
+
           {/* P&L Widget */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
