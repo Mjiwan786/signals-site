@@ -148,7 +148,7 @@ export function useLiveStatus() {
  * Hook for Signals streaming via SSE
  * Uses the new unified SSE endpoint
  */
-export function useSignalsStream(mode: 'paper' | 'live' = 'paper', enabled: boolean = true) {
+export function useSignalsStream(mode: 'paper' | 'live' | 'staging' = 'paper', enabled: boolean = true) {
   const [signals, setSignals] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);

@@ -86,7 +86,7 @@ export type ApiError = z.infer<typeof ApiErrorSchema>;
  * Query Parameters for Signals API
  */
 export const SignalsQuerySchema = z.object({
-  mode: z.enum(['paper', 'live']).default('paper'),
+  mode: z.enum(['paper', 'live', 'staging']).default('paper'),
   pair: z.string().optional(),
   limit: z.number().int().positive().max(1000).default(200),
 });

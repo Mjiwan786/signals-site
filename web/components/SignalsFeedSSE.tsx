@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Zap } from 'lucide-react';
 
 interface SignalsFeedProps {
-  mode?: 'paper' | 'live';
+  mode?: 'paper' | 'live' | 'staging';
   maxSignals?: number;
 }
 
@@ -57,7 +57,7 @@ export default function SignalsFeedSSE({ mode = 'paper', maxSignals = 50 }: Sign
           <Zap className="w-6 h-6 text-accent" />
           <h2 className="text-2xl font-bold text-text">Live Signals</h2>
           <span className="text-sm text-dim px-3 py-1 bg-surface/50 rounded-full">
-            {mode === 'paper' ? 'Paper Trading' : 'Live Trading'}
+            {mode === 'staging' ? 'Staging (New Pairs)' : mode === 'paper' ? 'Paper Trading' : 'Live Trading'}
           </span>
         </div>
 

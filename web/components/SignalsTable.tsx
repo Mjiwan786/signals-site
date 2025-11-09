@@ -29,7 +29,7 @@ import { DEFAULT_MODE } from '@/lib/env';
  */
 
 export default function SignalsTable() {
-  const [mode, setMode] = useState<'paper' | 'live'>(DEFAULT_MODE as any);
+  const [mode, setMode] = useState<'paper' | 'live' | 'staging'>(DEFAULT_MODE as any);
   const [pair, setPair] = useState<string>('');
   const [rows, setRows] = useState<SignalDTO[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -78,6 +78,7 @@ export default function SignalsTable() {
             >
               <option value="paper">Paper Trading</option>
               <option value="live">Live Trading</option>
+              <option value="staging">Staging (New Pairs)</option>
             </select>
           </div>
 
@@ -85,14 +86,20 @@ export default function SignalsTable() {
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-dim mb-2 flex items-center gap-2">
               <Filter className="w-3 h-3" />
-              Pair Filter
+              Trading Pair
             </label>
-            <input
+            <select
               value={pair}
               onChange={(e) => setPair(e.target.value)}
-              placeholder="e.g. BTC-USD, ETH-USD"
-              className="w-full bg-surface border border-accent/30 rounded-lg px-4 py-2.5 text-text text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accentA focus:border-accentA transition-all hover:border-accent/50"
-            />
+              className="w-full bg-surface border border-accent/30 rounded-lg px-4 py-2.5 text-text text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accentA focus:border-accentA transition-all hover:border-accent/50"
+            >
+              <option value="">All Pairs</option>
+              <option value="BTC/USD">BTC/USD - Bitcoin</option>
+              <option value="ETH/USD">ETH/USD - Ethereum</option>
+              <option value="SOL/USD">SOL/USD - Solana</option>
+              <option value="ADA/USD">ADA/USD - Cardano</option>
+              <option value="AVAX/USD">AVAX/USD - Avalanche</option>
+            </select>
           </div>
 
           {/* Refresh Button */}
