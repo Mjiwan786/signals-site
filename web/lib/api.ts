@@ -193,13 +193,20 @@ export async function getHealth(): Promise<HealthCheck> {
 
 /**
  * SSE Connection Manager for real-time signals
+ * Features:
+ * - Exponential backoff reconnection (1s → 5s → 15s)
+ * - Heartbeat detection (30s timeout)
+ * - Automatic cleanup on disconnect
  */
 export class SignalsStreamManager {
   private eventSource: EventSource | null = null;
   private reconnectTimer: NodeJS.Timeout | null = null;
+  private heartbeatTimer: NodeJS.Timeout | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectDelay = 2000; // Start with 2s delay
+  private reconnectDelays = [1000, 5000, 15000, 15000, 15000]; // 1s, 5s, 15s, 15s, 15s
+  private heartbeatTimeout = 30000; // 30 seconds
+  private lastMessageTime = 0;
 
   constructor(
     private onMessage: (signal: SignalDTO) => void,
@@ -227,12 +234,17 @@ export class SignalsStreamManager {
       this.eventSource.onopen = () => {
         console.log('SSE connection established');
         this.reconnectAttempts = 0;
-        this.reconnectDelay = 2000;
+        this.lastMessageTime = Date.now();
+        this.startHeartbeatMonitor();
         this.onConnect?.();
       };
 
       this.eventSource.onmessage = (event) => {
         try {
+          // Update last message time (includes heartbeat comments)
+          this.lastMessageTime = Date.now();
+          this.resetHeartbeatMonitor();
+
           const data = JSON.parse(event.data);
           const signal = safeParse(SignalDTOSchema, data);
 
@@ -265,9 +277,43 @@ export class SignalsStreamManager {
   }
 
   /**
+   * Start heartbeat monitor
+   * If no message received in 30 seconds, reconnect
+   */
+  private startHeartbeatMonitor(): void {
+    this.stopHeartbeatMonitor();
+    this.heartbeatTimer = setTimeout(() => {
+      const timeSinceLastMessage = Date.now() - this.lastMessageTime;
+      if (timeSinceLastMessage >= this.heartbeatTimeout) {
+        console.warn(`No heartbeat for ${timeSinceLastMessage}ms, reconnecting...`);
+        this.handleDisconnect();
+      }
+    }, this.heartbeatTimeout);
+  }
+
+  /**
+   * Reset heartbeat monitor
+   */
+  private resetHeartbeatMonitor(): void {
+    this.startHeartbeatMonitor();
+  }
+
+  /**
+   * Stop heartbeat monitor
+   */
+  private stopHeartbeatMonitor(): void {
+    if (this.heartbeatTimer) {
+      clearTimeout(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+  }
+
+  /**
    * Disconnect from SSE stream
    */
   disconnect(): void {
+    this.stopHeartbeatMonitor();
+
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -283,13 +329,14 @@ export class SignalsStreamManager {
 
   /**
    * Handle disconnection with exponential backoff reconnect
+   * Backoff schedule: 1s → 5s → 15s → 15s → 15s
    */
   private handleDisconnect(): void {
     this.disconnect();
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      const delay = this.reconnectDelays[this.reconnectAttempts] || 15000;
       this.reconnectAttempts++;
-      const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
       console.log(
         `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`

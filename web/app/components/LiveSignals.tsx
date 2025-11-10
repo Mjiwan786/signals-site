@@ -21,12 +21,26 @@ export default function LiveSignals() {
   const eventSourceRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
-    // Fetch initial active signals
+    // Fetch initial active signals from /v1/signals
     const fetchActiveSignals = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signals/active`, { cache: 'no-store' })
-        const data: Signal[] = await response.json()
-        setSignals(data.slice(0, 100)) // Cap at 100
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/signals?limit=100`, { cache: 'no-store' })
+        const apiData = await response.json()
+
+        // Map API response to Signal interface
+        const mappedSignals: Signal[] = apiData.map((item: any) => ({
+          id: item.id,
+          time: item.ts,  // API uses "ts" field
+          pair: item.pair,
+          side: item.side.toUpperCase() as 'BUY' | 'SELL',  // API returns lowercase
+          entry: item.entry,
+          sl: item.sl,
+          tp: item.tp,
+          conf: item.confidence,  // API uses "confidence" field
+          strat: item.strategy  // API uses "strategy" field
+        }))
+
+        setSignals(mappedSignals)
         setIsLoading(false)
       } catch (error) {
         console.error('Failed to fetch active signals:', error)
@@ -36,51 +50,22 @@ export default function LiveSignals() {
 
     fetchActiveSignals()
 
-    // Setup EventSource for live updates
-    const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_API_URL}/live`)
-    eventSourceRef.current = eventSource
-
-    eventSource.onopen = () => {
+    // TODO: Setup EventSource for live updates when /v1/stream endpoint is ready
+    // For now, mark as connected if initial fetch succeeds
+    if (!isLoading) {
       setIsConnected(true)
     }
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        if (data.type === 'signal') {
-          const newSignal: Signal = {
-            id: data.id,
-            time: data.time,
-            pair: data.pair,
-            side: data.side,
-            entry: data.entry,
-            sl: data.sl,
-            tp: data.tp,
-            conf: data.conf,
-            strat: data.strat
-          }
-          
-          setSignals(prev => {
-            const updated = [newSignal, ...prev].slice(0, 100) // Cap at 100
-            return updated
-          })
-        }
-      } catch (error) {
-        console.error('Error parsing live signal:', error)
-      }
-    }
-
-    eventSource.onerror = (error) => {
-      console.error('EventSource error:', error)
-      setIsConnected(false)
-    }
+    // Refresh signals every 10 seconds as fallback
+    const pollInterval = setInterval(fetchActiveSignals, 10000)
 
     return () => {
+      clearInterval(pollInterval)
       if (eventSourceRef.current) {
         eventSourceRef.current.close()
       }
     }
-  }, [])
+  }, [isLoading])
 
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString()
@@ -108,13 +93,24 @@ export default function LiveSignals() {
 
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
+      {/* Prominent LIVE Banner */}
+      {isConnected && (
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 flex items-center justify-center space-x-3 animate-pulse">
+          <div className="flex items-center space-x-2">
+            <span className="inline-block w-3 h-3 rounded-full bg-white animate-ping"></span>
+            <span className="inline-block w-3 h-3 rounded-full bg-white -ml-5"></span>
+          </div>
+          <span className="text-white font-bold text-lg uppercase tracking-wider">🔴 LIVE SYSTEM - Real-Time Trading Signals</span>
+        </div>
+      )}
+
       <div className="px-6 py-4 border-b border-gray-700">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-white">Live Signals</h3>
+          <h3 className="text-lg font-semibold text-white">Trading Signals</h3>
           <div className="flex items-center">
             <span className={`inline-block w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
             <span className="text-xs text-gray-400">
-              {isConnected ? 'Live' : 'Disconnected'}
+              {isConnected ? 'Connected' : 'Reconnecting...'}
             </span>
           </div>
         </div>

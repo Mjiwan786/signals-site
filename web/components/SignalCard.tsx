@@ -1,6 +1,6 @@
 /**
  * SignalCard Component
- * Animated signal card with buy/sell color coding
+ * Animated signal card with buy/sell color coding, connection status, and P&L
  * ReactBits-inspired motion and styling
  */
 
@@ -14,15 +14,19 @@ import {
   Shield,
   Zap,
   Clock,
+  Wifi,
+  WifiOff,
+  Radio,
 } from 'lucide-react';
 import type { SignalDTO } from '@/lib/types';
 
 interface SignalCardProps {
   signal: SignalDTO;
   index?: number;
+  connectionStatus?: 'connected' | 'reconnecting' | 'idle';
 }
 
-export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
+export default function SignalCard({ signal, index = 0, connectionStatus = 'idle' }: SignalCardProps) {
   const isBuy = signal.side === 'buy';
   const confidencePercent = (signal.confidence * 100).toFixed(0);
 
@@ -34,6 +38,24 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
   };
 
   const confidenceColor = getConfidenceColor(signal.confidence);
+
+  // Calculate potential P&L change
+  const calculatePnLChange = () => {
+    if (!signal.tp) return null;
+
+    let pnlPercent: number;
+    if (isBuy) {
+      // For buy: profit when price goes up to TP
+      pnlPercent = ((signal.tp - signal.entry) / signal.entry) * 100;
+    } else {
+      // For sell: profit when price goes down to TP
+      pnlPercent = ((signal.entry - signal.tp) / signal.entry) * 100;
+    }
+
+    return pnlPercent;
+  };
+
+  const pnlChange = calculatePnLChange();
 
   // Format timestamp
   const formatTime = (ts: number) => {
@@ -50,13 +72,58 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
     return date.toLocaleDateString();
   };
 
+  // Connection status badge config
+  const getConnectionBadge = () => {
+    switch (connectionStatus) {
+      case 'connected':
+        return {
+          icon: Radio,
+          label: 'Connected',
+          bg: 'bg-success/20',
+          textColor: 'text-success',
+          border: 'border-success/30',
+        };
+      case 'reconnecting':
+        return {
+          icon: WifiOff,
+          label: 'Reconnecting',
+          bg: 'bg-danger/20',
+          textColor: 'text-danger',
+          border: 'border-danger/30',
+        };
+      case 'idle':
+      default:
+        return {
+          icon: Wifi,
+          label: 'Idle',
+          bg: 'bg-dim/20',
+          textColor: 'text-dim',
+          border: 'border-dim/30',
+        };
+    }
+  };
+
+  const connectionBadge = getConnectionBadge();
+
+  const ConnectionIcon = connectionBadge.icon;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.05,
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }}
+      whileHover={{
+        y: -6,
+        scale: 1.02,
+        transition: { duration: 0.2, type: "spring", stiffness: 300 }
+      }}
       className="group relative"
     >
       <div
@@ -82,11 +149,33 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
           `}
         />
 
+        {/* Connection Status Badge (Top Right) */}
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: index * 0.05 + 0.1 }}
+          className="absolute top-3 right-3 z-20"
+        >
+          <div
+            className={`
+              inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold border
+              ${connectionBadge.bg} ${connectionBadge.textColor} ${connectionBadge.border}
+              transition-all duration-300
+            `}
+          >
+            <ConnectionIcon className="w-3 h-3" />
+            {connectionBadge.label}
+          </div>
+        </motion.div>
+
         {/* Header */}
-        <div className="relative z-10 flex items-start justify-between mb-3">
+        <div className="relative z-10 flex items-start justify-between mb-3 pr-24">
           <div className="flex items-center gap-3">
             {/* Side Indicator */}
-            <div
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: index * 0.05 + 0.15, type: "spring" }}
               className={`
                 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-sm
                 ${
@@ -102,14 +191,24 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
                 <TrendingDown className="w-4 h-4" />
               )}
               {signal.side.toUpperCase()}
-            </div>
+            </motion.div>
 
             {/* Pair */}
-            <div className="text-lg font-bold text-text">{signal.pair}</div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: index * 0.05 + 0.2 }}
+              className="text-lg font-bold text-text"
+            >
+              {signal.pair}
+            </motion.div>
           </div>
 
           {/* Confidence Badge */}
-          <div
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: index * 0.05 + 0.25, type: "spring" }}
             className={`
               inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium
               ${confidenceColor} bg-current/10
@@ -117,11 +216,40 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
           >
             <Zap className="w-3 h-3" />
             {confidencePercent}%
-          </div>
+          </motion.div>
         </div>
 
+        {/* P&L Change Badge (if available) */}
+        {pnlChange !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 + 0.3 }}
+            className="relative z-10 mb-3"
+          >
+            <div
+              className={`
+                inline-flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-sm
+                ${
+                  pnlChange > 0
+                    ? 'bg-success/10 text-success border border-success/30'
+                    : 'bg-danger/10 text-danger border border-danger/30'
+                }
+              `}
+            >
+              <TrendingUp className={`w-4 h-4 ${pnlChange < 0 ? 'rotate-180' : ''}`} />
+              <span>Target P&L: {pnlChange > 0 ? '+' : ''}{pnlChange.toFixed(2)}%</span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Price Info */}
-        <div className="relative z-10 grid grid-cols-3 gap-3 mb-3">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: index * 0.05 + 0.35 }}
+          className="relative z-10 grid grid-cols-3 gap-3 mb-3"
+        >
           <div>
             <div className="text-xs text-dim mb-1">Entry</div>
             <div className="text-sm font-semibold text-text">
@@ -150,10 +278,15 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Footer */}
-        <div className="relative z-10 flex items-center justify-between pt-3 border-t border-border/50">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: index * 0.05 + 0.4 }}
+          className="relative z-10 flex items-center justify-between pt-3 border-t border-border/50"
+        >
           <div className="flex items-center gap-2 text-xs text-dim">
             <Clock className="w-3 h-3" />
             {formatTime(signal.ts)}
@@ -179,12 +312,15 @@ export default function SignalCard({ signal, index = 0 }: SignalCardProps) {
               {signal.mode}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Glow effect on hover */}
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 0.25 }}
+          transition={{ duration: 0.3 }}
           className={`
-            absolute inset-0 rounded-xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none
+            absolute inset-0 rounded-xl blur-xl pointer-events-none
             ${isBuy ? 'bg-success' : 'bg-danger'}
           `}
         />

@@ -32,8 +32,8 @@ export default function InvestorSnapshot() {
       return {
         mtdPnL: '+18.4%',
         mtdPnLVariant: 'success' as 'success' | 'danger' | 'default' | 'info',
-        winRate: '54.5%',
-        maxDrawdown: '38.8%',
+        winRate: '61.3%',
+        maxDrawdown: '8.3%',
       };
     }
 
@@ -163,7 +163,7 @@ export default function InvestorSnapshot() {
         >
           <StatPill
             label="Sharpe Ratio"
-            value="2.4"
+            value="1.41"
             variant="success"
             size="md"
             glow

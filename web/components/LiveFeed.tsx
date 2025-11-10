@@ -17,18 +17,24 @@ import { EmptyState, LoadingSpinner } from './Skeleton';
 interface LiveFeedProps {
   mode?: 'paper' | 'live';
   maxSignals?: number;
+  pair?: string; // Filter signals by trading pair (e.g., "BTC/USD")
 }
 
-export default function LiveFeed({ mode = 'paper', maxSignals = 50 }: LiveFeedProps) {
+export default function LiveFeed({ mode = 'paper', maxSignals = 50, pair }: LiveFeedProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
   const [newSignalCount, setNewSignalCount] = useState(0);
 
-  const { signals, isConnected, isLoadingHistory, error, clearSignals } = useSignalsStream(
+  const { signals: allSignals, isConnected, isLoadingHistory, error, clearSignals } = useSignalsStream(
     { mode },
     true // enabled
   );
+
+  // Filter signals by pair if specified
+  const signals = pair
+    ? allSignals.filter(signal => signal.pair === pair)
+    : allSignals;
 
   // Auto-scroll to top when new signal arrives (unless paused or hovered)
   useEffect(() => {
@@ -201,7 +207,11 @@ export default function LiveFeed({ mode = 'paper', maxSignals = 50 }: LiveFeedPr
         <AnimatePresence mode="popLayout">
           {displaySignals.map((signal, index) => (
             <div key={signal.id} role="article" aria-label={`${signal.side} signal for ${signal.pair}`}>
-              <SignalCard signal={signal} index={index} />
+              <SignalCard
+                signal={signal}
+                index={index}
+                connectionStatus={isConnected ? 'connected' : error ? 'reconnecting' : 'idle'}
+              />
             </div>
           ))}
         </AnimatePresence>

@@ -60,7 +60,7 @@ export default function PerformancePage() {
                   <ArrowUpIcon className="w-6 h-6 text-success" />
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-bold text-success mb-1">+47.3%</div>
+                  <div className="text-4xl font-bold text-success mb-1">+177.9%</div>
                   <div className="text-sm text-dim">Annualized</div>
                 </div>
               </div>
@@ -78,7 +78,7 @@ export default function PerformancePage() {
                   <BarChartIcon className="w-6 h-6 text-accent" />
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-bold text-accent mb-1">2.43</div>
+                  <div className="text-4xl font-bold text-accent mb-1">1.41</div>
                   <div className="text-sm text-dim">Ratio</div>
                 </div>
               </div>
@@ -96,13 +96,13 @@ export default function PerformancePage() {
                   <CalendarIcon className="w-6 h-6 text-accentB" />
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-success mb-0.5">+18.7%</div>
-                  <div className="text-2xl font-bold text-danger">-4.3%</div>
+                  <div className="text-2xl font-bold text-success mb-0.5">+12.1%</div>
+                  <div className="text-2xl font-bold text-danger">-10.0%</div>
                 </div>
               </div>
               <h3 className="text-lg font-semibold text-text mb-2">Best / Worst Month</h3>
               <p className="text-sm text-text2 leading-relaxed">
-                Peak monthly performance (June 2024) and worst monthly drawdown (Feb 2024).
+                Peak monthly performance (Jan 2025) and worst monthly drawdown (Feb 2025).
               </p>
               <div className="absolute bottom-0 right-0 w-32 h-32 bg-accentB/5 rounded-full blur-3xl group-hover:bg-accentB/10 transition-colors" />
             </div>
@@ -116,19 +116,19 @@ export default function PerformancePage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-5 bg-surface border border-border rounded-lg">
-              <div className="text-2xl font-bold text-text mb-1">54.5%</div>
+              <div className="text-2xl font-bold text-text mb-1">61.3%</div>
               <div className="text-xs text-dim uppercase tracking-wide">Win Rate</div>
             </div>
             <div className="p-5 bg-surface border border-border rounded-lg">
-              <div className="text-2xl font-bold text-text mb-1">442</div>
+              <div className="text-2xl font-bold text-text mb-1">720</div>
               <div className="text-xs text-dim uppercase tracking-wide">Total Trades</div>
             </div>
             <div className="p-5 bg-surface border border-border rounded-lg">
-              <div className="text-2xl font-bold text-danger mb-1">-8.2%</div>
+              <div className="text-2xl font-bold text-danger mb-1">-8.3%</div>
               <div className="text-xs text-dim uppercase tracking-wide">Max Drawdown</div>
             </div>
             <div className="p-5 bg-surface border border-border rounded-lg">
-              <div className="text-2xl font-bold text-text mb-1">3.2</div>
+              <div className="text-2xl font-bold text-text mb-1">1.52</div>
               <div className="text-xs text-dim uppercase tracking-wide">Profit Factor</div>
             </div>
           </div>

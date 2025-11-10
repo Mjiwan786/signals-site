@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Hero from "@/components/Hero";
+import LiveStatus from "@/components/LiveStatus";
 import TrustStrip from "@/components/TrustStrip";
 import KpiStrip from "@/components/KpiStrip";
 import PnLSection from "@/components/PnLSection";
@@ -10,7 +11,7 @@ import SocialProof from "@/components/SocialProof";
 import FeatureGrid from "@/components/FeatureGrid";
 import ArchitectureDiagram from "@/components/ArchitectureDiagram";
 import InvestorSnapshot from "@/components/InvestorSnapshot";
-import CommunityStrip from "@/components/CommunityStrip";
+import WhyBuySection from "@/components/WhyBuySection";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { prefetchPnL } from "@/lib/hooks";
@@ -25,8 +26,11 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero Section — Futuristic 3D + headline animations */}
+      {/* Hero Section — Aurora background + animated text */}
       <Hero />
+
+      {/* Live Status Section — Real-time system metrics */}
+      <LiveStatus />
 
       {/* Trust Strip — Exchange badges + latency + rolling ticker */}
       <TrustStrip />
@@ -49,11 +53,11 @@ export default function Home() {
       {/* Feature Grid — Core capabilities */}
       <FeatureGrid />
 
-      {/* Community Strip — As seen on / community metrics */}
-      <CommunityStrip />
-
       {/* Architecture Diagram — Tech stack visualization */}
       <ArchitectureDiagram />
+
+      {/* Why Buy Section — 2x2 bento grid with business value props */}
+      <WhyBuySection />
 
       {/* CTA Section */}
       <section className="relative w-full bg-bg py-20 overflow-hidden">

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Cross2Icon, ExclamationTriangleIcon, CheckCircledIcon } from '@radix-ui/react-icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.aipredictedsignals.cloud';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || 'https://crypto-signals-api.fly.dev';
 
 interface ApiStatus {
   isHealthy: boolean;
@@ -29,7 +29,7 @@ export default function ApiStatusBanner() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
-        const response = await fetch(`${API_BASE_URL}/v1/status/health`, {
+        const response = await fetch(`${API_BASE_URL}/health`, {
           cache: 'no-store',
           signal: controller.signal,
         });
@@ -151,7 +151,7 @@ export function ApiHealthIndicator() {
 
     const checkHealth = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/v1/status/health`, {
+        const response = await fetch(`${API_BASE_URL}/health`, {
           cache: 'no-store',
         });
         setIsHealthy(response.ok);

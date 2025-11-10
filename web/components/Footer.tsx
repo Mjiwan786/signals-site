@@ -61,7 +61,7 @@ const partners = [
 ];
 
 /**
- * Health Status Pill - fetches /v1/status/health
+ * Health Status Pill - fetches /health
  */
 function HealthStatus() {
   const [status, setStatus] = useState<'healthy' | 'degraded' | 'unknown'>('unknown');
@@ -71,7 +71,7 @@ function HealthStatus() {
     async function fetchHealth() {
       try {
         const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
-        const response = await fetch(`${apiBase}/v1/status/health`, {
+        const response = await fetch(`${apiBase}/health`, {
           method: 'GET',
           headers: { 'Accept': 'application/json' },
         });
@@ -253,6 +253,18 @@ export default function Footer() {
                 <span className="text-xs font-mono">{partner.logo}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Paper Trading Disclaimer */}
+        <div className="border-t border-accent/30 pt-6 pb-4">
+          <div className="bg-surface/50 border border-accent/20 rounded-lg p-4">
+            <p className="text-xs text-dim text-center leading-relaxed">
+              <span className="text-highlight font-semibold">PAPER TRADING DISCLOSURE:</span>{" "}
+              All signals and performance metrics displayed on this platform represent simulated paper trading results only.
+              No real capital is at risk. Past performance, whether real or simulated, does not guarantee future results.
+              Cryptocurrency trading carries substantial risk of loss. Consult a financial advisor before trading real capital.
+            </p>
           </div>
         </div>
 

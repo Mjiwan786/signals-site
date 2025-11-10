@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import SignalsPanel from '@/components/SignalsPanel';
-import PnLWidget from '@/components/PnLWidget';
+import PnLWidget from '@/components/PnlWidget';
 import ProfitabilityMetrics from '@/components/ProfitabilityMetrics';
 
 export default function InvestorPage() {

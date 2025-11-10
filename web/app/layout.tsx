@@ -4,7 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import ApiGuard from "@/components/ApiGuard";
 import ApiStatusBanner from "@/components/ApiStatusBanner";
-import Navbar from "@/components/Navbar";
+import NavbarEnhanced from "@/components/NavbarEnhanced";
 import Footer from "@/components/Footer";
 import { LenisScroll } from "@/lib/lenis-scroll";
 import WebVitals from "@/components/WebVitals";
@@ -161,7 +161,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         <ApiGuard />
-        <Navbar />
+        <NavbarEnhanced />
         <ApiStatusBanner />
         <main id="main-content" className="flex-1" role="main">
           {children}

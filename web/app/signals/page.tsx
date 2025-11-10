@@ -69,10 +69,17 @@ function SignalsPageContent() {
           <h1 className="text-4xl md:text-5xl font-display font-bold text-text mb-3">
             Live Trading Signals
           </h1>
-          <p className="text-lg text-text2 max-w-2xl">
+          <p className="text-lg text-text2 max-w-2xl mb-4">
             AI-powered signals with transparent performance tracking. All data streamed in real-time via
             secure Redis TLS connection.
           </p>
+
+          {/* Paper Trading Notice */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-highlight/10 border border-highlight/30 rounded-lg">
+            <span className="text-sm font-semibold text-highlight">PAPER TRADING MODE</span>
+            <span className="text-xs text-dim">•</span>
+            <span className="text-xs text-dim">Simulated results - No real capital at risk</span>
+          </div>
         </motion.div>
 
         {/* Main Content Grid */}

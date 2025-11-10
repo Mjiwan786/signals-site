@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Radio } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://crypto-signals-api.fly.dev';
 
@@ -71,37 +72,62 @@ export default function LiveStatusPill() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.05 }}
       className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${
         isHealthy
-          ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20'
+          ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20 shadow-lg shadow-green-500/10'
           : 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
       }`}
       title={`Last checked: ${status?.lastChecked.toLocaleTimeString()} • Latency: ${latencyMs}ms`}
     >
       {/* Status dot with pulse animation */}
-      <div className="relative">
-        <div
-          className={`w-2 h-2 rounded-full ${
-            isHealthy ? 'bg-green-500' : 'bg-red-500'
-          }`}
-        />
-        {isHealthy && (
-          <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75" />
+      <div className="relative flex items-center justify-center">
+        {isHealthy ? (
+          <>
+            {/* Animated Radio Icon for LIVE */}
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [1, 0.7, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <Radio className="w-3 h-3 text-green-500" fill="currentColor" />
+            </motion.div>
+            {/* Outer pulse ring */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full bg-green-500 animate-ping opacity-60" />
+            </div>
+          </>
+        ) : (
+          <div className="w-2 h-2 rounded-full bg-red-500" />
         )}
       </div>
 
       {/* Status text */}
-      <span
-        className={`text-xs font-semibold uppercase tracking-wide ${
+      <motion.span
+        animate={isHealthy ? {
+          opacity: [1, 0.8, 1],
+        } : {}}
+        transition={{
+          duration: 2,
+          repeat: isHealthy ? Infinity : 0,
+          ease: "easeInOut"
+        }}
+        className={`text-xs font-bold uppercase tracking-wider ${
           isHealthy ? 'text-green-400' : 'text-red-400'
         }`}
       >
         {isHealthy ? 'LIVE' : 'OFFLINE'}
-      </span>
+      </motion.span>
 
       {/* Latency badge (only when healthy) */}
       {isHealthy && latencyMs > 0 && (
-        <span className="text-[10px] text-green-300/60 font-mono">
+        <span className="text-[10px] text-green-300/70 font-mono font-semibold">
           {latencyMs}ms
         </span>
       )}

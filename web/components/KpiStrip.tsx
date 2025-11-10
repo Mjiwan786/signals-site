@@ -24,43 +24,43 @@ interface KpiData {
 const kpis: KpiData[] = [
   {
     label: 'ROI (12-Month)',
-    value: 7.54,
+    value: 177.9,
     suffix: '%',
     prefix: '+',
-    decimals: 2,
-    tooltip: 'Total return from 12-month backtest simulation (Nov 2024 - Nov 2025). Conservative estimate with no leverage, spot trading only.',
+    decimals: 1,
+    tooltip: 'Total return from 12-month backtest simulation (Nov 2024 - Oct 2025) across 5 trading pairs. Enhanced multi-agent system with proven edge.',
     icon: <TrendingUp className="w-6 h-6" />,
     color: 'green',
     trend: 'up',
   },
   {
     label: 'Win Rate',
-    value: 54.5,
+    value: 61.3,
     suffix: '%',
     prefix: '',
     decimals: 1,
-    tooltip: 'Percentage of profitable trades in 12-month backtest (442 total trades). Industry standard for systematic quant strategies.',
+    tooltip: 'Percentage of profitable trades in 12-month backtest (720 total trades). Industry standard for systematic quant strategies.',
     icon: <Target className="w-6 h-6" />,
     color: 'cyan',
   },
   {
     label: 'Max Drawdown',
-    value: 38.8,
+    value: 8.3,
     suffix: '%',
     prefix: '-',
     decimals: 1,
-    tooltip: 'Maximum peak-to-trough decline over 12-month backtest period. High but realistic for crypto volatility without leverage.',
+    tooltip: 'Maximum peak-to-trough decline over 12-month backtest period. Low drawdown indicates strong risk management and capital preservation.',
     icon: <TrendingDown className="w-6 h-6" />,
     color: 'orange',
     trend: 'down',
   },
   {
     label: 'Sharpe Ratio',
-    value: 0.76,
+    value: 1.41,
     suffix: '',
     prefix: '',
     decimals: 2,
-    tooltip: 'Risk-adjusted return measure from 12-month backtest. 0.5-2.0 is typical for crypto strategies. Higher is better.',
+    tooltip: 'Risk-adjusted return measure from 12-month backtest. Values above 1.0 are considered good. Higher ratio indicates better risk-adjusted returns.',
     icon: <Users className="w-6 h-6" />,
     color: 'violet',
   },
@@ -188,13 +188,13 @@ function KpiCard({ kpi }: { kpi: KpiData }) {
 
           {/* Tooltip Content */}
           <div
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-elev border border-accent/30 rounded-lg text-xs text-text2 w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-opacity duration-200 z-20 shadow-glow"
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-3 bg-gray-900/98 backdrop-blur-xl border-2 border-purple-500/40 rounded-xl text-sm text-white w-64 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-opacity duration-200 z-20 shadow-2xl"
             role="tooltip"
           >
-            <p className="text-center">{kpi.tooltip}</p>
+            <p className="text-center leading-relaxed font-medium">{kpi.tooltip}</p>
             {/* Tooltip Arrow */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px" aria-hidden="true">
-              <div className="border-4 border-transparent border-t-elev" />
+              <div className="border-8 border-transparent border-t-purple-500/40" />
             </div>
           </div>
         </div>

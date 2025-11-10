@@ -1,6 +1,17 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 
+// Make EventSource available globally for SSE tests
+const EventSource = require('eventsource')
+global.EventSource = EventSource
+
+// Set test environment variables
+process.env.NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-signals-api.fly.dev'
+process.env.NEXT_PUBLIC_API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://crypto-signals-api.fly.dev'
+process.env.NEXT_PUBLIC_SIGNALS_MODE = process.env.NEXT_PUBLIC_SIGNALS_MODE || 'paper'
+
+console.log('Jest setup: EventSource configured')
+
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}

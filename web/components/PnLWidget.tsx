@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_API_URL || 'https://crypto-signals-api.fly.dev';
 
@@ -236,7 +236,13 @@ export default function PnLWidget() {
       <div className="p-6">
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="pnlGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#ec4899" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis
                 dataKey="time"
@@ -251,15 +257,17 @@ export default function PnLWidget() {
                 tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="equity"
-                stroke={metrics && metrics.isPositive ? '#10B981' : '#EF4444'}
-                strokeWidth={2}
+                stroke="#c084fc"
+                fillOpacity={1}
+                fill="url(#pnlGradient)"
+                strokeWidth={3}
                 dot={false}
-                activeDot={{ r: 4, fill: metrics && metrics.isPositive ? '#10B981' : '#EF4444' }}
+                activeDot={{ r: 6, fill: '#c084fc', stroke: '#fff', strokeWidth: 2 }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           /* Empty state */
