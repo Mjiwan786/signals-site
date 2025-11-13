@@ -239,6 +239,42 @@ export class SignalsStreamManager {
         this.onConnect?.();
       };
 
+      // Listen for 'connected' event from backend
+      this.eventSource.addEventListener('connected', (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('SSE connected event received:', data);
+          this.lastMessageTime = Date.now();
+          this.resetHeartbeatMonitor();
+        } catch (error) {
+          console.error('Failed to parse connected event:', error);
+        }
+      });
+
+      // Listen for 'signal' events (backend sends event: signal)
+      this.eventSource.addEventListener('signal', (event) => {
+        try {
+          // Update last message time
+          this.lastMessageTime = Date.now();
+          this.resetHeartbeatMonitor();
+
+          const data = JSON.parse(event.data);
+          const signal = safeParse(SignalDTOSchema, data);
+
+          if (signal) {
+            this.onMessage(signal);
+          } else {
+            console.error('Invalid signal data received:', data);
+          }
+        } catch (error) {
+          console.error('Failed to parse SSE signal event:', error);
+          this.onError?.(
+            error instanceof Error ? error : new Error('Parse error')
+          );
+        }
+      });
+
+      // Also listen for default message events (backward compatibility)
       this.eventSource.onmessage = (event) => {
         try {
           // Update last message time (includes heartbeat comments)
