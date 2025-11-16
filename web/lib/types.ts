@@ -103,6 +103,117 @@ export const PnLQuerySchema = z.object({
 export type PnLQuery = z.infer<typeof PnLQuerySchema>;
 
 /**
+ * Backtest Equity Point Schema
+ * Single point on the equity curve from /api/backtest/{symbol_id}/equity
+ */
+export const BacktestEquityPointSchema = z.object({
+  ts: z.string(), // ISO8601 UTC datetime
+  equity: z.number(),
+  balance: z.number().optional(),
+  unrealized_pnl: z.number().optional(),
+});
+
+export type BacktestEquityPoint = z.infer<typeof BacktestEquityPointSchema>;
+
+/**
+ * Backtest Pairs List Response
+ * Response from /api/backtest/pairs
+ */
+export const BacktestPairsResponseSchema = z.object({
+  pairs: z.array(z.string()),
+  total: z.number(),
+});
+
+export type BacktestPairsResponse = z.infer<typeof BacktestPairsResponseSchema>;
+
+/**
+ * Backtest Equity Curve Response
+ * Response from /api/backtest/{symbol_id}/equity
+ */
+export const BacktestEquityCurveResponseSchema = z.object({
+  symbol: z.string(),
+  symbol_id: z.string(),
+  timeframe: z.string(),
+  points: z.array(BacktestEquityPointSchema),
+  start_ts: z.string(),
+  end_ts: z.string(),
+  initial_capital: z.number(),
+  final_equity: z.number(),
+});
+
+export type BacktestEquityCurveResponse = z.infer<typeof BacktestEquityCurveResponseSchema>;
+
+/**
+ * Backtest Trade Schema
+ * Individual trade record from /api/backtest/{symbol_id}/trades
+ */
+export const BacktestTradeSchema = z.object({
+  id: z.number(),
+  ts_entry: z.string(),
+  ts_exit: z.string(),
+  side: z.enum(['long', 'short']),
+  entry_price: z.number(),
+  exit_price: z.number(),
+  size: z.number(),
+  net_pnl: z.number(),
+  runup: z.number().optional(),
+  drawdown: z.number().optional(),
+  cumulative_pnl: z.number().optional(),
+  signal: z.string().optional(),
+  exit_reason: z.enum(['take_profit', 'stop_loss', 'time_exit', 'end_of_backtest', 'signal_flip']).optional(),
+});
+
+export type BacktestTrade = z.infer<typeof BacktestTradeSchema>;
+
+/**
+ * Backtest Trades Response
+ * Response from /api/backtest/{symbol_id}/trades
+ */
+export const BacktestTradesResponseSchema = z.object({
+  symbol: z.string(),
+  symbol_id: z.string(),
+  trades: z.array(BacktestTradeSchema),
+  total_trades: z.number(),
+  winning_trades: z.number(),
+  losing_trades: z.number(),
+  win_rate_pct: z.number(),
+});
+
+export type BacktestTradesResponse = z.infer<typeof BacktestTradesResponseSchema>;
+
+/**
+ * Backtest Summary Stats
+ * Stats object from /api/backtest/{symbol_id}/summary
+ */
+export const BacktestStatsSchema = z.object({
+  total_trades: z.number(),
+  win_rate_pct: z.number(),
+  profit_factor: z.number(),
+  max_drawdown_pct: z.number(),
+  sharpe_ratio: z.number(),
+  total_return_pct: z.number(),
+  initial_capital: z.number(),
+  final_equity: z.number(),
+});
+
+export type BacktestStats = z.infer<typeof BacktestStatsSchema>;
+
+/**
+ * Backtest Summary Response
+ * Response from /api/backtest/{symbol_id}/summary
+ */
+export const BacktestSummaryResponseSchema = z.object({
+  symbol: z.string(),
+  symbol_id: z.string(),
+  timeframe: z.string(),
+  start_ts: z.string(),
+  end_ts: z.string(),
+  stats: BacktestStatsSchema,
+});
+
+export type BacktestSummaryResponse = z.infer<typeof BacktestSummaryResponseSchema>;
+
+/**
  * SSE Message Schema
  * For validating incoming SSE/WebSocket messages
  */

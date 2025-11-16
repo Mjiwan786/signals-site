@@ -645,7 +645,7 @@ case 'checkout.session.completed': {
 
 ## References
 
-- **PRD**: `PRD_AGENTIC.MD` (Step 7 - Pricing + Stripe)
+- **PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 - **Stripe Docs**: https://stripe.com/docs/api
 - **Stripe Checkout**: https://stripe.com/docs/payments/checkout
 - **Stripe Webhooks**: https://stripe.com/docs/webhooks

@@ -311,7 +311,7 @@ npm run start
 
 - **Dev Server:** http://localhost:3000
 - **Design System Plan:** `DESIGN_SYSTEM_PLAN.md` (comprehensive guide)
-- **PRD Reference:** `PRD_AGENTIC.MD` (product requirements)
+- **PRD Reference:** `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 
 ---
 

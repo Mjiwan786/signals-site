@@ -421,7 +421,7 @@ npm run dev
 
 ## Support & References
 
-- **PRD**: `PRD-003 – Signals-Site Front-End SaaS Portal`
+- **PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 - **Deployment Guide**: `DEPLOYMENT_GUIDE.md`
 - **Quick Start**: `QUICK_START_REVIEW.md`
 - **Design System**: `DESIGN_SYSTEM_PLAN.md`

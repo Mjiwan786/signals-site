@@ -18,6 +18,14 @@ import {
   SignalsQuerySchema,
   PnLQuery,
   PnLQuerySchema,
+  BacktestPairsResponse,
+  BacktestPairsResponseSchema,
+  BacktestEquityCurveResponse,
+  BacktestEquityCurveResponseSchema,
+  BacktestTradesResponse,
+  BacktestTradesResponseSchema,
+  BacktestSummaryResponse,
+  BacktestSummaryResponseSchema,
   safeParse,
 } from './types';
 import { logApiError } from './error-logger';
@@ -189,6 +197,53 @@ export async function getSignals(
  */
 export async function getHealth(): Promise<HealthCheck> {
   return fetchJSON(`${API_BASE}/v1/status/health`, HealthCheckSchema);
+}
+
+/**
+ * Get list of available backtest pairs
+ * @returns List of available trading pairs with backtest data
+ */
+export async function getBacktestPairs(): Promise<BacktestPairsResponse> {
+  return fetchJSON(
+    `${API_BASE}/api/backtest/pairs`,
+    BacktestPairsResponseSchema
+  );
+}
+
+/**
+ * Get backtest equity curve for a specific symbol
+ * @param symbolId - Trading pair symbol ID (e.g., "BTC-USD", "ETH-USD")
+ * @returns Backtest equity curve with data points
+ */
+export async function getBacktestEquity(symbolId: string): Promise<BacktestEquityCurveResponse> {
+  return fetchJSON(
+    `${API_BASE}/api/backtest/${symbolId}/equity`,
+    BacktestEquityCurveResponseSchema
+  );
+}
+
+/**
+ * Get backtest trades for a specific symbol
+ * @param symbolId - Trading pair symbol ID (e.g., "BTC-USD", "ETH-USD")
+ * @returns Backtest trades with entry/exit details
+ */
+export async function getBacktestTrades(symbolId: string): Promise<BacktestTradesResponse> {
+  return fetchJSON(
+    `${API_BASE}/api/backtest/${symbolId}/trades`,
+    BacktestTradesResponseSchema
+  );
+}
+
+/**
+ * Get backtest summary statistics for a specific symbol
+ * @param symbolId - Trading pair symbol ID (e.g., "BTC-USD", "ETH-USD")
+ * @returns Backtest summary with performance metrics
+ */
+export async function getBacktestSummary(symbolId: string): Promise<BacktestSummaryResponse> {
+  return fetchJSON(
+    `${API_BASE}/api/backtest/${symbolId}/summary`,
+    BacktestSummaryResponseSchema
+  );
 }
 
 /**

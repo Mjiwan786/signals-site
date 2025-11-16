@@ -17,13 +17,16 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Target, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
 import StatPill, { IconStatPill } from './StatPill';
 import { staggerContainer, fadeInUp } from '@/lib/motion-variants';
-import { usePnL } from '@/lib/hooks';
+import { usePnL, useSignals } from '@/lib/hooks';
 import { useMemo } from 'react';
 import { calculatePnLStats } from '@/lib/pnl';
 
 export default function InvestorSnapshot() {
   // Fetch recent PnL data for MTD calculation
   const { data: pnlPoints, isLoading } = usePnL(500);
+
+  // Fetch signals for calculating additional stats
+  const { signals, isLoading: isLoadingSignals } = useSignals({ mode: 'paper', limit: 1000 });
 
   // Calculate investor-focused metrics
   const metrics = useMemo(() => {
@@ -80,6 +83,37 @@ export default function InvestorSnapshot() {
       maxDrawdown: maxDrawdownStr,
     };
   }, [pnlPoints]);
+
+  // Calculate additional stats from signals
+  const additionalStats = useMemo(() => {
+    if (signals.length === 0) {
+      return {
+        sharpeRatio: '...',
+        avgTrade: '...',
+        recoveryFactor: '...',
+        profitFactor: '...',
+      };
+    }
+
+    const stats = calculatePnLStats(signals);
+
+    // Calculate average trade return percentage
+    const avgTradePercent = stats.totalTrades > 0
+      ? (stats.totalPnL / stats.totalTrades / 10000) * 100 // Assuming $10k initial capital
+      : 0;
+
+    // Calculate recovery factor (Total Profit / Max Drawdown)
+    const recoveryFactor = stats.maxDrawdown > 0
+      ? stats.totalPnL / stats.maxDrawdown
+      : 0;
+
+    return {
+      sharpeRatio: stats.sharpeRatio.toFixed(2),
+      avgTrade: `${avgTradePercent >= 0 ? '+' : ''}${avgTradePercent.toFixed(1)}%`,
+      recoveryFactor: `${recoveryFactor.toFixed(1)}x`,
+      profitFactor: stats.profitFactor.toFixed(1),
+    };
+  }, [signals]);
 
   return (
     <section className="relative w-full bg-bg py-16 overflow-hidden" aria-labelledby="investor-snapshot">
@@ -163,29 +197,29 @@ export default function InvestorSnapshot() {
         >
           <StatPill
             label="Sharpe Ratio"
-            value="1.41"
+            value={isLoadingSignals ? '...' : additionalStats.sharpeRatio}
             variant="success"
             size="md"
             glow
           />
           <StatPill
             label="Avg Trade"
-            value="+3.2%"
+            value={isLoadingSignals ? '...' : additionalStats.avgTrade}
             variant="info"
-            trend="up"
+            trend={!isLoadingSignals && additionalStats.avgTrade.startsWith('+') ? 'up' : undefined}
             size="md"
             glow
           />
           <StatPill
             label="Recovery Factor"
-            value="5.8x"
+            value={isLoadingSignals ? '...' : additionalStats.recoveryFactor}
             variant="success"
             size="md"
             glow
           />
           <StatPill
             label="Profit Factor"
-            value="2.1"
+            value={isLoadingSignals ? '...' : additionalStats.profitFactor}
             variant="info"
             size="md"
             glow

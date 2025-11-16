@@ -662,7 +662,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 ## References
 
-- **PRD**: `PRD_AGENTIC.MD` (Step 6 - Signals Page)
+- **PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 - **Data Contracts**: `STEP_5_DATA_CONTRACTS_COMPLETE.md`
 - **Recharts Docs**: https://recharts.org/en-US/
 - **Framer Motion**: https://www.framer.com/motion/

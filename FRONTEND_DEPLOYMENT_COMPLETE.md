@@ -329,7 +329,7 @@ vercel --prod
 - **API Documentation**: `signals_api/DEPLOYMENT_SUCCESS_SSE_FIX.md`
 - **SSE Implementation**: `signals_api/SSE_FIX_SUMMARY.md`
 - **Fly.io Deployment**: `signals_api/SHIP_CHECKLIST.md`
-- **Frontend Architecture**: `signals-site/PRD-003 – Signals-Site Front-End SaaS Portal`
+- **Frontend Architecture**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 
 ## Deployment Timeline
 

@@ -29,11 +29,11 @@ Step 4 implements a complete, production-ready landing page with all required se
 - Trust indicators: fadeIn with 0.7s delay
 
  **CTAs**:
-- **Primary**: "View Live PnL" ’ scrolls to #live-pnl section
+- **Primary**: "View Live PnL" ï¿½ scrolls to #live-pnl section
   - Gradient brand background
   - Glow effect on hover
   - Icon: TrendingUp + ArrowRight
-- **Secondary**: "Join Discord" ’ external link
+- **Secondary**: "Join Discord" ï¿½ external link
   - Glass surface background
   - Accent border on hover
   - Icon: MessageCircle + ArrowRight
@@ -175,10 +175,10 @@ Step 4 implements a complete, production-ready landing page with all required se
  **Content**:
 - Heading: "Ready to Start Trading Smarter?"
 - Subheading: Value proposition
-- **Primary CTA**: "Get Started Now" ’ Discord invite
+- **Primary CTA**: "Get Started Now" ï¿½ Discord invite
   - Gradient brand button
   - Glow shadow
-- **Secondary CTA**: "View Dashboard" ’ /dashboard
+- **Secondary CTA**: "View Dashboard" ï¿½ /dashboard
   - Surface background
   - Border accent
 
@@ -205,7 +205,7 @@ Step 4 implements a complete, production-ready landing page with all required se
 ### 9. **ArchitectureDiagram Component**
 - Tech stack visualization
 - System architecture flow
-- Redis ’ API ’ Frontend
+- Redis ï¿½ API ï¿½ Frontend
 
 ---
 
@@ -251,7 +251,7 @@ body::before {
 - `.bg-grid-dots` - Dotted grid
 
 ### Gradient Classes
-- `.bg-gradient-neural` - Cyan ’ Violet ’ Orange
+- `.bg-gradient-neural` - Cyan ï¿½ Violet ï¿½ Orange
 - `.bg-gradient-mesh` - Dual radial gradients
 - `.bg-gradient-glow` - Single radial glow
 - `.text-gradient` - Gradient text fill
@@ -295,7 +295,7 @@ body::before {
 ### Build Results
 ```
 Route (app)                    Size     First Load JS
- Ë /                          40.8 kB   187 kB
+ ï¿½ /                          40.8 kB   187 kB
 ```
 
  **First Load JS**: 187 kB (within budget)
@@ -489,10 +489,10 @@ lib/use-parallax.ts         Parallax hooks available
 - Edge 90+ 
 
 ### Graceful Degradation
-- Hero3D ’ SVG fallback (non-WebGL)
-- Animations ’ Static (reduced motion)
-- Grid backgrounds ’ Solid colors (IE11)
-- Backdrop blur ’ Solid background (older browsers)
+- Hero3D ï¿½ SVG fallback (non-WebGL)
+- Animations ï¿½ Static (reduced motion)
+- Grid backgrounds ï¿½ Solid colors (IE11)
+- Backdrop blur ï¿½ Solid background (older browsers)
 
 ---
 
@@ -554,7 +554,7 @@ lhci autorun
 
 ## References
 
-- **PRD**: `PRD_AGENTIC.MD` (M1 - Hero + Landing sections)
+- **PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 - **Step 3 Summary**: `STEP_3_HERO3D_COMPLETE.md`
 - **Motion Docs**: https://www.framer.com/motion/
 - **Tailwind CSS**: https://tailwindcss.com/docs

@@ -106,7 +106,7 @@ Step 5 implements complete data contracts with Zod validation, API fetchers with
 
  Reconnection Logic:
    - Max 5 attempts
-   - Exponential backoff (2s ’ 4s ’ 8s ’ 16s ’ 32s)
+   - Exponential backoff (2s ï¿½ 4s ï¿½ 8s ï¿½ 16s ï¿½ 32s)
    - Automatic retry on connection loss
 ```
 
@@ -380,30 +380,30 @@ Features:
 
 ### Zod Validation Flow
 ```
-API Response ’ fetchJSON<T>()
-             ’ schema.parse(data)
-             ’ Validated TypeScript Type
-             ’ Component
+API Response ï¿½ fetchJSON<T>()
+             ï¿½ schema.parse(data)
+             ï¿½ Validated TypeScript Type
+             ï¿½ Component
 ```
 
 ### SSE Connection Flow
 ```
-Component ’ useSignalsStream()
-         ’ SignalsStreamManager.connect()
-         ’ EventSource(url)
-         ’ onmessage ’ Zod validate ’ safeParse()
-         ’ Valid signal ’ onMessage callback
-         ’ Component updates
+Component ï¿½ useSignalsStream()
+         ï¿½ SignalsStreamManager.connect()
+         ï¿½ EventSource(url)
+         ï¿½ onmessage ï¿½ Zod validate ï¿½ safeParse()
+         ï¿½ Valid signal ï¿½ onMessage callback
+         ï¿½ Component updates
 ```
 
 ### Error Handling Flow
 ```
-API Error ’ fetchJSON() throws ApiError
-         ’ SWR catches error
-         ’ useApiErrorHandler() formats message
-         ’ ErrorFallback component displays
-         ’ User clicks retry
-         ’ SWR mutate() refetches
+API Error ï¿½ fetchJSON() throws ApiError
+         ï¿½ SWR catches error
+         ï¿½ useApiErrorHandler() formats message
+         ï¿½ ErrorFallback component displays
+         ï¿½ User clicks retry
+         ï¿½ SWR mutate() refetches
 ```
 
 ---
@@ -412,9 +412,9 @@ API Error ’ fetchJSON() throws ApiError
 
 ```
 Route (app)                              Size     First Load JS
- Ë /                                    39.2 kB   188 kB
- Ë /signals                             1.46 kB   147 kB
- Ë /dashboard                           660 B     148 kB
+ ï¿½ /                                    39.2 kB   188 kB
+ ï¿½ /signals                             1.46 kB   147 kB
+ ï¿½ /dashboard                           660 B     148 kB
 ```
 
  **Build Status**: Successful
@@ -647,7 +647,7 @@ NEXT_PUBLIC_SIGNALS_MODE=paper
 
 ## References
 
-- **PRD**: `PRD_AGENTIC.MD` (Functional Requirements sections 1-2)
+- **PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 - **Zod Documentation**: https://zod.dev
 - **SWR Documentation**: https://swr.vercel.app
 - **SSE MDN**: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events

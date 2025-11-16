@@ -49,6 +49,12 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
+      - name: Validate PRD-003 Checklist
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        run: |
+          echo "Validating PRD-003 checklist completion..."
+          python3 scripts/check_prd_checklist.py
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

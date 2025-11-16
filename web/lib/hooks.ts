@@ -8,8 +8,27 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import useSWR from 'swr';
-import { getSignals, getPnL, getHealth, SignalsStreamManager, ApiError } from './api';
-import type { SignalDTO, PnLPoint, HealthCheck, SignalsQuery } from './types';
+import {
+  getSignals,
+  getPnL,
+  getHealth,
+  getBacktestPairs,
+  getBacktestEquity,
+  getBacktestTrades,
+  getBacktestSummary,
+  SignalsStreamManager,
+  ApiError
+} from './api';
+import type {
+  SignalDTO,
+  PnLPoint,
+  HealthCheck,
+  SignalsQuery,
+  BacktestPairsResponse,
+  BacktestEquityCurveResponse,
+  BacktestTradesResponse,
+  BacktestSummaryResponse
+} from './types';
 
 /**
  * Hook for fetching signals with SWR
@@ -364,4 +383,115 @@ export function useScrollAnimation(
   }, [threshold, triggerOnce, hasAnimated]);
 
   return { ref: elementRef, isInView, hasAnimated };
+}
+
+/**
+ * Hook for fetching list of available backtest pairs
+ * Provides automatic caching and revalidation with SWR
+ */
+export function useBacktestPairs() {
+  const { data, error, isLoading, mutate } = useSWR(
+    'backtest-pairs',
+    () => getBacktestPairs(),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // Cache for 60s
+      onError: (err) => {
+        console.error('useBacktestPairs error:', err);
+      },
+    }
+  );
+
+  return {
+    data: data ?? null,
+    pairs: data?.pairs ?? [],
+    error: error as ApiError | undefined,
+    isLoading,
+    isEmpty: !isLoading && (!data || data.pairs.length === 0),
+    refetch: mutate,
+  };
+}
+
+/**
+ * Hook for fetching backtest equity curve for a specific symbol
+ * Provides automatic caching and revalidation with SWR
+ */
+export function useBacktestEquity(symbolId: string | null) {
+  const { data, error, isLoading, mutate } = useSWR(
+    symbolId ? ['backtest-equity', symbolId] : null,
+    () => symbolId ? getBacktestEquity(symbolId) : null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // Cache for 60s
+      onError: (err) => {
+        console.error('useBacktestEquity error:', err);
+      },
+    }
+  );
+
+  return {
+    data: data ?? null,
+    error: error as ApiError | undefined,
+    isLoading,
+    isEmpty: !isLoading && (!data || data.points.length === 0),
+    refetch: mutate,
+  };
+}
+
+/**
+ * Hook for fetching backtest trades for a specific symbol
+ * Provides automatic caching and revalidation with SWR
+ */
+export function useBacktestTrades(symbolId: string | null) {
+  const { data, error, isLoading, mutate } = useSWR(
+    symbolId ? ['backtest-trades', symbolId] : null,
+    () => symbolId ? getBacktestTrades(symbolId) : null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // Cache for 60s
+      onError: (err) => {
+        console.error('useBacktestTrades error:', err);
+      },
+    }
+  );
+
+  return {
+    data: data ?? null,
+    trades: data?.trades ?? [],
+    error: error as ApiError | undefined,
+    isLoading,
+    isEmpty: !isLoading && (!data || data.trades.length === 0),
+    refetch: mutate,
+  };
+}
+
+/**
+ * Hook for fetching backtest summary statistics for a specific symbol
+ * Provides automatic caching and revalidation with SWR
+ */
+export function useBacktestSummary(symbolId: string | null) {
+  const { data, error, isLoading, mutate } = useSWR(
+    symbolId ? ['backtest-summary', symbolId] : null,
+    () => symbolId ? getBacktestSummary(symbolId) : null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // Cache for 60s
+      onError: (err) => {
+        console.error('useBacktestSummary error:', err);
+      },
+    }
+  );
+
+  return {
+    data: data ?? null,
+    stats: data?.stats ?? null,
+    error: error as ApiError | undefined,
+    isLoading,
+    isEmpty: !isLoading && !data,
+    refetch: mutate,
+  };
 }

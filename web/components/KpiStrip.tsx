@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Target, TrendingDown, Users, Info } from 'lucide-react';
 import { useCountUp } from '@/lib/useCountUp';
 import { scaleIn, staggerContainer, hoverGlow } from '@/lib/motion-variants';
+import { useSignals } from '@/lib/hooks';
+import { calculatePnLStats } from '@/lib/pnl';
+import { KpiSkeleton, ErrorFallback } from './Skeleton';
+import { useMemo } from 'react';
 
 interface KpiData {
   label: string;
@@ -16,55 +20,6 @@ interface KpiData {
   color: 'cyan' | 'violet' | 'orange' | 'green';
   trend?: 'up' | 'down';
 }
-
-// REAL BACKTEST DATA - Updated 2025-11-08
-// Source: 12-month conservative simulation with validated fee/slippage model
-// See: crypto-ai-bot/out/acquire_annual_snapshot.csv
-// Methodology: crypto-ai-bot/ANNUAL_SNAPSHOT_RESULTS_SUMMARY.md
-const kpis: KpiData[] = [
-  {
-    label: 'ROI (12-Month)',
-    value: 177.9,
-    suffix: '%',
-    prefix: '+',
-    decimals: 1,
-    tooltip: 'Total return from 12-month backtest simulation (Nov 2024 - Oct 2025) across 5 trading pairs. Enhanced multi-agent system with proven edge.',
-    icon: <TrendingUp className="w-6 h-6" />,
-    color: 'green',
-    trend: 'up',
-  },
-  {
-    label: 'Win Rate',
-    value: 61.3,
-    suffix: '%',
-    prefix: '',
-    decimals: 1,
-    tooltip: 'Percentage of profitable trades in 12-month backtest (720 total trades). Industry standard for systematic quant strategies.',
-    icon: <Target className="w-6 h-6" />,
-    color: 'cyan',
-  },
-  {
-    label: 'Max Drawdown',
-    value: 8.3,
-    suffix: '%',
-    prefix: '-',
-    decimals: 1,
-    tooltip: 'Maximum peak-to-trough decline over 12-month backtest period. Low drawdown indicates strong risk management and capital preservation.',
-    icon: <TrendingDown className="w-6 h-6" />,
-    color: 'orange',
-    trend: 'down',
-  },
-  {
-    label: 'Sharpe Ratio',
-    value: 1.41,
-    suffix: '',
-    prefix: '',
-    decimals: 2,
-    tooltip: 'Risk-adjusted return measure from 12-month backtest. Values above 1.0 are considered good. Higher ratio indicates better risk-adjusted returns.',
-    icon: <Users className="w-6 h-6" />,
-    color: 'violet',
-  },
-];
 
 const colorClasses = {
   cyan: {
@@ -94,6 +49,117 @@ const colorClasses = {
 };
 
 export default function KpiStrip() {
+  // Fetch signals to calculate real metrics
+  const { signals, isLoading, error, refetch } = useSignals({ mode: 'paper', limit: 1000 });
+
+  // Calculate metrics from signals
+  const kpis = useMemo<KpiData[]>(() => {
+    if (signals.length === 0) {
+      // Return empty placeholders while loading or if no data
+      return [
+        {
+          label: 'ROI (12-Month)',
+          value: 0,
+          suffix: '%',
+          prefix: '+',
+          decimals: 1,
+          tooltip: 'Total return from live trading data across all pairs.',
+          icon: <TrendingUp className="w-6 h-6" />,
+          color: 'green',
+          trend: 'up',
+        },
+        {
+          label: 'Win Rate',
+          value: 0,
+          suffix: '%',
+          prefix: '',
+          decimals: 1,
+          tooltip: 'Percentage of profitable trades.',
+          icon: <Target className="w-6 h-6" />,
+          color: 'cyan',
+        },
+        {
+          label: 'Max Drawdown',
+          value: 0,
+          suffix: '%',
+          prefix: '-',
+          decimals: 1,
+          tooltip: 'Maximum peak-to-trough decline. Low drawdown indicates strong risk management.',
+          icon: <TrendingDown className="w-6 h-6" />,
+          color: 'orange',
+          trend: 'down',
+        },
+        {
+          label: 'Sharpe Ratio',
+          value: 0,
+          suffix: '',
+          prefix: '',
+          decimals: 2,
+          tooltip: 'Risk-adjusted return measure. Values above 1.0 are considered good.',
+          icon: <Users className="w-6 h-6" />,
+          color: 'violet',
+        },
+      ];
+    }
+
+    const stats = calculatePnLStats(signals);
+
+    return [
+      {
+        label: 'ROI (12-Month)',
+        value: stats.totalPnLPercent,
+        suffix: '%',
+        prefix: stats.totalPnLPercent >= 0 ? '+' : '',
+        decimals: 1,
+        tooltip: `Total return from ${stats.totalTrades} trades across all pairs. Current equity: $${stats.currentEquity.toFixed(2)}.`,
+        icon: <TrendingUp className="w-6 h-6" />,
+        color: 'green',
+        trend: stats.totalPnLPercent >= 0 ? 'up' : 'down',
+      },
+      {
+        label: 'Win Rate',
+        value: stats.winRate,
+        suffix: '%',
+        prefix: '',
+        decimals: 1,
+        tooltip: `${stats.winningTrades} winning trades out of ${stats.totalTrades} total trades.`,
+        icon: <Target className="w-6 h-6" />,
+        color: 'cyan',
+      },
+      {
+        label: 'Max Drawdown',
+        value: stats.maxDrawdownPercent,
+        suffix: '%',
+        prefix: '-',
+        decimals: 1,
+        tooltip: `Maximum peak-to-trough decline ($${stats.maxDrawdown.toFixed(2)}). Low drawdown indicates strong risk management.`,
+        icon: <TrendingDown className="w-6 h-6" />,
+        color: 'orange',
+        trend: 'down',
+      },
+      {
+        label: 'Sharpe Ratio',
+        value: stats.sharpeRatio,
+        suffix: '',
+        prefix: '',
+        decimals: 2,
+        tooltip: `Risk-adjusted return measure. Values above 1.0 are considered good. Avg win: $${stats.averageWin.toFixed(2)}, Avg loss: $${stats.averageLoss.toFixed(2)}.`,
+        icon: <Users className="w-6 h-6" />,
+        color: 'violet',
+      },
+    ];
+  }, [signals]);
+
+  if (error) {
+    return (
+      <section id="live-pnl" className="relative w-full bg-bg py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <ErrorFallback error={error} onRetry={refetch} title="Failed to load performance metrics" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="live-pnl" className="relative w-full bg-bg py-12 overflow-hidden" aria-label="Key performance indicators">
       {/* Subtle grid background */}
@@ -109,29 +175,38 @@ export default function KpiStrip() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-2xl md:text-3xl font-display font-bold text-text mb-2">
-            12-Month Backtest Performance
+            {isLoading ? 'Loading Performance...' : 'Live Trading Performance'}
           </h2>
           <p className="text-dim text-sm md:text-base max-w-3xl mx-auto">
-            Verified results from conservative 12-month simulation (Nov 2024 - Nov 2025).
-            Includes realistic Kraken fees (5 bps) and slippage (2 bps).
+            {isLoading
+              ? 'Fetching real-time trading data...'
+              : `Real-time metrics calculated from ${signals.length} signals. Includes realistic Kraken fees and slippage.`}
           </p>
           <p className="text-xs text-dim/70 mt-2 italic">
-            Backtested performance. Past results do not guarantee future returns. See methodology documentation for full details.
+            Live trading data. Past performance does not guarantee future returns.
           </p>
         </motion.div>
 
         {/* Grid: 2×2 on mobile, 4×1 on desktop */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          {kpis.map((kpi, index) => (
-            <KpiCard key={index} kpi={kpi} />
-          ))}
-        </motion.div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <KpiSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            {kpis.map((kpi, index) => (
+              <KpiCard key={index} kpi={kpi} />
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );

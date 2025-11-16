@@ -1,7 +1,7 @@
 # Step 13 - Investor Finishing Touches - COMPLETE ✅
 
 **Completion Date:** January 22, 2025
-**PRD Reference:** PRD_AGENTIC.MD - Steps 10-13
+**PRD Reference:** `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 
 ---
 

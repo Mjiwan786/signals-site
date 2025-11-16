@@ -377,7 +377,7 @@ redis-cli -u redis://default:***@redis-19818... --tls --cacert <cert> XLEN signa
 
 ### Reference Documents
 - **API PRD**: `signals_api/PRD-002 – Signals-API Gateway & Middleware`
-- **Frontend PRD**: `signals-site/PRD-003 – Signals-Site Front-End SaaS Portal`
+- **Frontend PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative signals-site specification)
 - **Bot PRD**: `crypto_ai_bot/PRD-001 – Crypto-AI-Bot Core Intelligence Engine`
 
 ### Contact & Support

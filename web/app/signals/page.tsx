@@ -10,10 +10,10 @@
 
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, TrendingUp, Zap } from 'lucide-react';
+import { Activity, Zap, TrendingUp } from 'lucide-react';
 import { DEFAULT_MODE } from '@/lib/env';
-import PnLChart from '@/components/PnLChart';
 import LiveFeed from '@/components/LiveFeed';
+import PerformanceView from '@/components/performance/PerformanceView';
 import { fadeInUp, staggerContainer } from '@/lib/motion-variants';
 import { prefetchPnL } from '@/lib/hooks';
 import PageErrorBoundary from '@/components/PageErrorBoundary';
@@ -89,18 +89,9 @@ function SignalsPageContent() {
           initial="hidden"
           animate="visible"
         >
-          {/* PnL Chart Section */}
-          <motion.section variants={fadeInUp} className="scroll-mt-24" id="pnl-chart">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-success" />
-                <h2 className="text-2xl font-bold text-text">Performance Overview</h2>
-              </div>
-              <p className="text-dim">
-                Track cumulative equity curve with timeframe controls and drawdown overlay
-              </p>
-            </div>
-            <PnLChart initialN={500} />
+          {/* Performance View Section - LIVE/BACKTEST Tabs */}
+          <motion.section variants={fadeInUp} className="scroll-mt-24" id="performance-view">
+            <PerformanceView initialMode="live" />
           </motion.section>
 
           {/* Live Feed Section */}

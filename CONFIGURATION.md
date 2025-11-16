@@ -2,7 +2,7 @@
 
 Complete environment variable reference for Next.js frontend.
 
-**PRD Reference**: PRD-003 – Signals-Site Front-End SaaS Portal
+**PRD Reference**: `docs/PRD-003-SIGNALS-SITE.md`
 
 ---
 
@@ -316,7 +316,7 @@ Error: Webhook signature verification failed
 - **Next.js Env Docs**: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables
 - **Stripe Webhooks**: https://stripe.com/docs/webhooks
 - **Supabase Setup**: https://supabase.com/docs/guides/getting-started/quickstarts/nextjs
-- **PRD**: PRD-003 – Signals-Site Front-End SaaS Portal
+- **PRD**: `docs/PRD-003-SIGNALS-SITE.md` (Authoritative specification)
 - **SETUP.md**: Environment recreation guide
 
 ---
