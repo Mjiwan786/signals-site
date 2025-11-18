@@ -183,26 +183,26 @@ export default function PnLChart({ initialN = 500 }: { initialN?: number }) {
           </button>
         </div>
 
-        {/* Chart */}
-        <div className="w-full h-[400px] bg-elev/50 rounded-xl p-4 border border-border/50">
+        {/* Chart - Responsive height for mobile */}
+        <div className="w-full h-[300px] sm:h-[350px] md:h-[400px] bg-elev/50 rounded-xl p-2 sm:p-4 border border-border/50" role="img" aria-label="Portfolio equity curve chart">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData}>
               <defs>
                 <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor={stats.isPositive ? '#10b981' : '#ef4444'}
+                    stopColor={stats.isPositive ? '#22C55E' : '#F87171'}
                     stopOpacity={0.3}
                   />
                   <stop
                     offset="95%"
-                    stopColor={stats.isPositive ? '#10b981' : '#ef4444'}
+                    stopColor={stats.isPositive ? '#22C55E' : '#F87171'}
                     stopOpacity={0}
                   />
                 </linearGradient>
                 <linearGradient id="drawdownGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#F87171" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#F87171" stopOpacity={0} />
                 </linearGradient>
               </defs>
 
@@ -210,31 +210,34 @@ export default function PnLChart({ initialN = 500 }: { initialN?: number }) {
 
               <XAxis
                 dataKey="date"
-                stroke="#9AA0AA"
+                stroke="#A8AEB8"
                 fontSize={12}
                 tickLine={false}
                 tickFormatter={(value) => {
                   const date = new Date(value);
                   return `${date.getMonth() + 1}/${date.getDate()}`;
                 }}
+                aria-label="Date axis"
               />
 
               <YAxis
                 yAxisId="left"
-                stroke="#9AA0AA"
+                stroke="#A8AEB8"
                 fontSize={12}
                 tickLine={false}
                 tickFormatter={(value) => `$${value.toFixed(0)}`}
+                aria-label="Equity axis"
               />
 
               {showDrawdown && (
                 <YAxis
                   yAxisId="right"
                   orientation="right"
-                  stroke="#ef4444"
+                  stroke="#F87171"
                   fontSize={12}
                   tickLine={false}
                   tickFormatter={(value) => `${value.toFixed(0)}%`}
+                  aria-label="Drawdown percentage axis"
                 />
               )}
 
@@ -245,8 +248,8 @@ export default function PnLChart({ initialN = 500 }: { initialN?: number }) {
                   borderRadius: '8px',
                   padding: '12px',
                 }}
-                labelStyle={{ color: '#E6E8EC', marginBottom: '8px' }}
-                itemStyle={{ color: '#9AA0AA' }}
+                labelStyle={{ color: '#F0F2F5', marginBottom: '8px' }}
+                itemStyle={{ color: '#A8AEB8' }}
                 formatter={(value: number, name: string) => {
                   if (name === 'Equity') return [`$${value.toFixed(2)}`, name];
                   if (name === 'Drawdown') return [`${value.toFixed(2)}%`, name];
@@ -258,7 +261,7 @@ export default function PnLChart({ initialN = 500 }: { initialN?: number }) {
                 wrapperStyle={{ paddingTop: '20px' }}
                 iconType="line"
                 formatter={(value) => (
-                  <span style={{ color: '#E6E8EC', fontSize: '14px' }}>{value}</span>
+                  <span style={{ color: '#F0F2F5', fontSize: '14px' }}>{value}</span>
                 )}
               />
 
@@ -267,12 +270,12 @@ export default function PnLChart({ initialN = 500 }: { initialN?: number }) {
                 yAxisId="left"
                 type="monotone"
                 dataKey="equity"
-                stroke={stats.isPositive ? '#10b981' : '#ef4444'}
+                stroke={stats.isPositive ? '#22C55E' : '#F87171'}
                 strokeWidth={3}
                 fill="url(#equityGradient)"
                 name="Equity"
                 dot={false}
-                activeDot={{ r: 6, fill: stats.isPositive ? '#10b981' : '#ef4444' }}
+                activeDot={{ r: 6, fill: stats.isPositive ? '#22C55E' : '#F87171' }}
               />
 
               {/* Drawdown Area */}
@@ -281,12 +284,12 @@ export default function PnLChart({ initialN = 500 }: { initialN?: number }) {
                   yAxisId="right"
                   type="monotone"
                   dataKey="drawdown"
-                  stroke="#ef4444"
+                  stroke="#F87171"
                   strokeWidth={2}
                   fill="url(#drawdownGradient)"
                   name="Drawdown"
                   dot={false}
-                  activeDot={{ r: 5, fill: '#ef4444' }}
+                  activeDot={{ r: 5, fill: '#F87171' }}
                 />
               )}
             </ComposedChart>

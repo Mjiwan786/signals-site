@@ -69,5 +69,7 @@ dump.rdb
 *.pem
 *.key
 *.cert
+*.crt
 credentials.json
 .vercel
+redis-ca.*

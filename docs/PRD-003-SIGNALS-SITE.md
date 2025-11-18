@@ -1220,10 +1220,11 @@ Create comprehensive documentation site with the following pages:
    - Technology: Python, pandas, scikit-learn
    - Repo: (link if public)
 
-   **Redis Cloud**
+   **Redis Cloud (Backend Only)**
    - Service: Redis Enterprise Cloud
-   - Connection: `rediss://default:***@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818`
-   - TLS: Required (CA cert at `C:\Users\Maith\OneDrive\Desktop\signals-site\redis-ca.crt`)
+   - Connection: `rediss://default:<PASSWORD>@<REDIS_HOST>:<PORT>`
+   - TLS: Required (CA cert configured in backend)
+   - **Note:** Frontend does NOT access Redis directly
    - Streams:
      - `signals:live` → Real-time signal events
      - `signals:archive` → Historical signals
@@ -3016,26 +3017,31 @@ This section provides a **comprehensive, prioritized checklist** for Claude Code
 
 ## Appendix A: Redis Cloud Connection Details
 
-**Connection String (TLS Required):**
+**⚠️ IMPORTANT SECURITY NOTE:**
+> **The Next.js frontend NEVER connects directly to Redis or uses these credentials.**
+> Redis access is handled exclusively by the `signals-api` backend (Fly.io).
+> The frontend only calls the API via `NEXT_PUBLIC_API_URL`.
+
+**Connection String (TLS Required) - Backend Only:**
 ```
-rediss://default:[PASSWORD]@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818
+rediss://default:<YOUR_REDIS_PASSWORD>@<YOUR_REDIS_HOST>:<PORT>
 ```
 
-**URL-Encoded (for environment variables):**
+**URL-Encoded (for environment variables) - Backend Only:**
 ```
-rediss://default:Salam78614%2A%2A%24%24@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818
+rediss://default:<YOUR_REDIS_PASSWORD_URL_ENCODED>@<YOUR_REDIS_HOST>:<PORT>
 ```
 
-**CLI Connection:**
+**CLI Connection (for testing) - Backend Only:**
 ```bash
-redis-cli -u redis://default:[PASSWORD]@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818 \
+redis-cli -u redis://default:<YOUR_REDIS_PASSWORD>@<YOUR_REDIS_HOST>:<PORT> \
   --tls \
-  --cacert C:\Users\Maith\OneDrive\Desktop\signals-site\redis-ca.crt
+  --cacert <path_to_ca_certfile>
 ```
 
 **CA Certificate Path:**
 ```
-C:\Users\Maith\OneDrive\Desktop\signals-site\redis-ca.crt
+<path_to_redis_ca_certificate>
 ```
 
 **CA Certificate Zip (Downloaded):**
@@ -3043,17 +3049,17 @@ C:\Users\Maith\OneDrive\Desktop\signals-site\redis-ca.crt
 C:\Users\Maith\Downloads\redis_ca (4).zip
 ```
 
-**Usage in Code:**
+**Usage in Code (signals-api backend only):**
 ```typescript
-// For signals-api (Node.js)
+// For signals-api (Node.js) - NOT for frontend
 import Redis from 'ioredis';
 
 const redis = new Redis({
-  host: 'redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com',
-  port: 19818,
+  host: process.env.REDIS_HOST,
+  port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
   tls: {
-    ca: fs.readFileSync('/path/to/redis-ca.crt'),
+    ca: fs.readFileSync(process.env.REDIS_CA_CERT_PATH),
   },
 });
 ```

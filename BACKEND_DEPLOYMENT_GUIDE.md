@@ -123,8 +123,8 @@ primary_region = "iad"
 ## Step 4: Set Secrets in Fly.io
 
 ```powershell
-# Redis Cloud connection (use actual password)
-fly secrets set REDIS_URL="rediss://default:Salam78614**$$@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818"
+# Redis Cloud connection (replace with your actual credentials)
+fly secrets set REDIS_URL="rediss://default:<YOUR_REDIS_PASSWORD>@<YOUR_REDIS_HOST>:<PORT>"
 
 # Redis TLS configuration
 fly secrets set REDIS_SSL="true"

@@ -99,7 +99,9 @@
       "Bash(set:*)",
       "Bash(\"C:\\Users\\Maith\\.conda\\envs\\crypto-bot\\python.exe\" main.py run --mode paper --strategy bar_reaction_5m)",
       "Bash(\"C:\\Users\\Maith\\OneDrive\\Desktop\\signals-site\\web\\components\\PerformanceMetricsSection.tsx\")",
-      "Bash(\"C:\\Users\\Maith\\OneDrive\\Desktop\\crypto_ai_bot\\SOAK_TEST_48H_DEPLOYMENT_GUIDE.md\")"
+      "Bash(\"C:\\Users\\Maith\\OneDrive\\Desktop\\crypto_ai_bot\\SOAK_TEST_48H_DEPLOYMENT_GUIDE.md\")",
+      "Bash(git remote:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

@@ -15,6 +15,7 @@ const useStagingSignals = process.env.NEXT_PUBLIC_USE_STAGING_SIGNALS === 'true'
 const navLinks = [
   { href: "/signals", label: "Signals" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/white-label", label: "White-Label" },
   { href: "/tech", label: "Tech" },
 ];
 

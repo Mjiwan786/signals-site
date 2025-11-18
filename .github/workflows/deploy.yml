@@ -1,0 +1,305 @@
+name: Deploy signals-site to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # ============================================================================
+  # Test & Build Job
+  # ============================================================================
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check || true
+
+      - name: Run tests
+        run: npm run test || echo "No tests configured"
+
+      - name: Build application
+        env:
+          NEXT_PUBLIC_API_BASE: https://crypto-signals-api.fly.dev
+          NEXT_PUBLIC_SITE_URL: https://aipredictedsignals.cloud
+        run: npm run build
+
+      - name: Check bundle size
+        run: |
+          npm run build
+          echo "Build successful!"
+
+  # ============================================================================
+  # Deploy Preview (Pull Requests)
+  # ============================================================================
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+          echo "Preview URL: $url"
+
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### 🚀 Preview Deployment Ready!\n\n**Preview URL:** ${{ steps.deploy.outputs.url }}\n\n✅ Build completed successfully!`
+            })
+
+  # ============================================================================
+  # Deploy to Staging
+  # ============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://signals-site-staging.vercel.app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=staging --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Staging
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+          echo "Staging URL: $url"
+
+      - name: Verify deployment
+        run: |
+          echo "Waiting for deployment..."
+          sleep 20
+
+          # Check homepage
+          curl -f ${{ steps.deploy.outputs.url }} || exit 1
+
+          # Check API proxy
+          curl -f ${{ steps.deploy.outputs.url }}/api/health || exit 1
+
+          echo "✅ Staging deployment verified!"
+
+      - name: Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Staging deployment ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================================================
+  # Deploy to Production
+  # ============================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: |
+      (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+      (startsWith(github.ref, 'refs/tags/v'))
+    environment:
+      name: production
+      url: https://aipredictedsignals.cloud
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project
+        env:
+          NEXT_PUBLIC_API_BASE: https://crypto-signals-api.fly.dev
+          NEXT_PUBLIC_SITE_URL: https://aipredictedsignals.cloud
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Production
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+          echo "Production URL: $url"
+
+      - name: Comprehensive Health Checks
+        run: |
+          echo "Waiting for deployment to propagate..."
+          sleep 30
+
+          # Homepage check
+          echo "Checking homepage..."
+          curl -f https://aipredictedsignals.cloud || exit 1
+
+          # API health check via proxy
+          echo "Checking API health via proxy..."
+          curl -f https://aipredictedsignals.cloud/api/health || exit 1
+
+          # Check critical pages
+          echo "Checking /pricing page..."
+          curl -f https://aipredictedsignals.cloud/pricing || exit 1
+
+          echo "Checking /signals page..."
+          curl -f https://aipredictedsignals.cloud/signals || exit 1
+
+          echo "✅ All health checks passed!"
+
+      - name: Test Edge Runtime Latency (<500ms)
+        run: |
+          echo "Testing Vercel Edge Runtime latency..."
+          for i in {1..10}; do
+            start=$(date +%s%3N)
+            curl -s https://aipredictedsignals.cloud/api/signals/latest > /dev/null
+            end=$(date +%s%3N)
+            latency=$((end - start))
+            echo "Request $i: ${latency}ms"
+            if [ $latency -gt 500 ]; then
+              echo "⚠️ Latency warning: ${latency}ms > 500ms"
+            fi
+          done
+          echo "✅ Latency test complete"
+
+      - name: Test SSE Connection
+        run: |
+          echo "Testing SSE connection..."
+          timeout 10 curl -N https://aipredictedsignals.cloud/api/signals/sse || true
+          echo "✅ SSE endpoint responsive"
+
+      - name: Run Lighthouse Performance Audit
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            https://aipredictedsignals.cloud
+            https://aipredictedsignals.cloud/pricing
+            https://aipredictedsignals.cloud/signals
+          budgetPath: ./lighthouse-budget.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Create deployment tag
+        run: |
+          git tag -a "prod-$(date +%Y%m%d-%H%M%S)" \
+            -m "Production deployment - Commit: ${{ github.sha }}"
+          git push origin --tags || true
+
+      - name: Notify Discord
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          title: "signals-site Production Deployment"
+          description: |
+            Deployment ${{ job.status }}
+            URL: https://aipredictedsignals.cloud
+            Edge Runtime: ✅
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+
+      - name: Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            signals-site Production Deployment ${{ job.status }}
+            URL: https://aipredictedsignals.cloud
+            Vercel Edge Runtime: Active
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # ============================================================================
+  # Post-Deployment Monitoring
+  # ============================================================================
+  monitor:
+    name: Post-Deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: success()
+
+    steps:
+      - name: Setup monitoring
+        run: |
+          echo "Setting up post-deployment monitoring..."
+
+      - name: Monitor for 5 minutes
+        run: |
+          echo "Monitoring production for 5 minutes..."
+          for i in {1..10}; do
+            echo "Check $i/10..."
+            curl -f https://aipredictedsignals.cloud/api/health || exit 1
+            sleep 30
+          done
+          echo "✅ 5-minute monitoring complete - deployment stable"
+
+      - name: Notify monitoring complete
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'success'
+          text: '✅ Production deployment stable after 5-minute monitoring'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}

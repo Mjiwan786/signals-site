@@ -230,7 +230,7 @@ curl -N https://crypto-signals-api.fly.dev/sse/metrics
 **Connection String (TLS):**
 
 ```bash
-rediss://default:Salam78614%2A%2A%24%24@redis-19818.c9.us-east-1-4.ec2.redns.redis-cloud.com:19818
+rediss://default:<YOUR_REDIS_PASSWORD_URL_ENCODED>@<YOUR_REDIS_HOST>:<PORT>
 ```
 
 **CA Certificate Path (Engine):**
