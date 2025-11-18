@@ -59,9 +59,9 @@ export async function GET(req: NextRequest) {
         id: sub.id,
         plan: sub.items.data[0]?.price.nickname || 'Unknown Plan',
         status: sub.status,
-        currentPeriodEnd: new Date((sub.currentPeriodEnd as number) * 1000).toISOString(),
-        cancelAtPeriodEnd: sub.cancelAtPeriodEnd || false,
-        amount: sub.items.data[0]?.price.unitAmount || 0,
+        currentPeriodEnd: new Date((sub.current_period_end as number) * 1000).toISOString(),
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+        amount: sub.items.data[0]?.price.unit_amount || 0,
         interval: (sub.items.data[0]?.price.recurring?.interval as 'month' | 'year') || 'month',
       };
     }
